@@ -1,19 +1,12 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 
-export function middleware(request: NextRequest) {
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin")
+const isProtectedRoute = createRouteMatcher(["/admin(.*)"])
 
-  // Check for mock auth cookie
-  const isAuthenticated = request.cookies.get("mock_admin_auth")?.value === "true"
-
-  // Protect admin routes
-  if (isAdminRoute && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/sign-in", request.url))
+export default clerkMiddleware(async (auth, req) => {
+  if (isProtectedRoute(req)) {
+    await auth.protect()
   }
-
-  return NextResponse.next()
-}
+})
 
 export const config = {
   matcher: [

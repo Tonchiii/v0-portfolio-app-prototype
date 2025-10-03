@@ -1,24 +1,8 @@
-"use client"
-
-import { Shield, Lock } from "lucide-react"
+import { SignIn } from "@clerk/nextjs"
+import { Shield } from "lucide-react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { mockSignIn } from "@/lib/mock-auth"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
 
 export default function SignInPage() {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleMockSignIn = async () => {
-    setIsLoading(true)
-    await mockSignIn()
-    router.push("/admin")
-    router.refresh()
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/20">
@@ -35,36 +19,18 @@ export default function SignInPage() {
           <p className="text-muted-foreground mt-2">Access the admin dashboard</p>
         </div>
 
-        <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-cyan-400" />
-              Mock Authentication
-            </CardTitle>
-            <CardDescription>
-              This is a prototype with mock authentication. Click below to sign in as admin.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 rounded-lg bg-secondary/20 border border-border/50">
-              <p className="text-sm text-muted-foreground mb-2">Demo Credentials:</p>
-              <p className="text-sm font-mono">eltonramos417@gmail.com</p>
-            </div>
-
-            <Button
-              onClick={handleMockSignIn}
-              disabled={isLoading}
-              className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
-              size="lg"
-            >
-              {isLoading ? "Signing in..." : "Sign In as Admin"}
-            </Button>
-
-            <p className="text-xs text-center text-muted-foreground">
-              In production, this would use Clerk with Google OAuth
-            </p>
-          </CardContent>
-        </Card>
+        <div className="flex justify-center">
+          <SignIn
+            appearance={{
+              elements: {
+                rootBox: "mx-auto",
+                card: "bg-card/50 backdrop-blur-sm border-border/50",
+              },
+            }}
+            fallbackRedirectUrl="/admin"
+            signUpUrl="/sign-up"
+          />
+        </div>
 
         <div className="text-center mt-6">
           <Link href="/" className="text-sm text-muted-foreground hover:text-cyan-400 transition-colors">

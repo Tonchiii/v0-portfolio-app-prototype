@@ -41,6 +41,9 @@ export function Navigation() {
             <Link href="/#blog" className="text-sm font-medium hover:text-cyan-400 transition-colors">
               Blog
             </Link>
+            <Link href="/security-plan" className="text-sm font-medium hover:text-cyan-400 transition-colors">
+              Security Plan
+            </Link>
             <Link href="/#newsletter" className="text-sm font-medium hover:text-cyan-400 transition-colors">
               Newsletter
             </Link>
@@ -77,6 +80,13 @@ export function Navigation() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Blog
+            </Link>
+            <Link
+              href="/security-plan"
+              className="block text-sm font-medium hover:text-cyan-400 transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Security Plan
             </Link>
             <Link
               href="/#newsletter"
