@@ -18,8 +18,8 @@ export const experiences: Experience[] = [
     company: "St. Paul University Philippines",
     period: "Current Student",
     description:
-      "Pursuing degree in Information Technology with focus on software development, data analysis, and database management. Building strong foundation in modern development practices and system architecture.",
-    technologies: ["Laravel", "PHP", "Python", "Database Management", "Software Development", "Data Analysis"],
+      "Pursuing degree in Information Technology with focus on software development, cyber security, and database management. Building strong foundation in modern development practices and system architecture.",
+    technologies: ["Laravel", "PHP", "Python", "Database Management", "Software Development", "Cyber Security"],
   },
 ]
 
@@ -28,6 +28,6 @@ export const skills: Skill[] = [
   { name: "Python", category: "tools", level: 75 },
   { name: "Database Management", category: "tools", level: 80 },
   { name: "Software Development", category: "security", level: 78 },
-  { name: "Data Analysis", category: "security", level: 72 },
+  { name: "Cyber Security", category: "security", level: 72 },
   { name: "System Solutions", category: "cloud", level: 70 },
 ]

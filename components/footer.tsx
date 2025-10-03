@@ -10,7 +10,7 @@ export function Footer() {
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2 font-bold text-xl">
               <Shield className="w-6 h-6 text-cyan-400" />
-              <span>CyberSec Pro</span>
+              <span>Open Learning</span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Expert cybersecurity specialist protecting digital assets through advanced security solutions
@@ -68,7 +68,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} CyberSec Pro. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Open Learning. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -30,7 +30,7 @@ export function Navigation() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 font-bold text-xl">
             <Shield className="w-6 h-6 text-cyan-400" />
-            <span>CyberSec Pro</span>
+            <span>Open Learning</span>
           </Link>
 
           {/* Desktop navigation */}

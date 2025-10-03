@@ -67,12 +67,12 @@ export function HeroSection() {
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-balance text-center">
             Building Efficient Systems Through
             <span className="block mt-2 bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
-              Software Development & Data Analysis
+              Software Development & Cyber Security
             </span>
           </h2>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto text-pretty leading-relaxed text-center">
-            Detail-oriented IT student with experience in software development and data analysis. Skilled in
+            Detail-oriented IT student with experience in software development and cyber security. Skilled in
             PHP/Laravel, Python, and database management. Seeking to apply my technical skills in an innovative role to
             contribute to efficient system solutions.
           </p>

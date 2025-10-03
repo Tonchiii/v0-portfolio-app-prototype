@@ -29,7 +29,7 @@ export default function SignInPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 font-bold text-2xl mb-4">
             <Shield className="w-8 h-8 text-cyan-400" />
-            <span>CyberSec Pro</span>
+            <span>Open Learning</span>
           </Link>
           <h1 className="text-3xl font-bold mt-4">Admin Sign In</h1>
           <p className="text-muted-foreground mt-2">Access the admin dashboard</p>
