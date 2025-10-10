@@ -84,7 +84,7 @@ export default async function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">{activeSubscribers.length}</div>
-                <p className="text-xs text-muted-foreground mt-1">Currently subscribed</p>
+                <p className="text-xs text-muted-foreground mt-1">Currently subscribe</p>
               </CardContent>
             </Card>
 
