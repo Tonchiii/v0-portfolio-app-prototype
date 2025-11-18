@@ -53,9 +53,10 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
   // Content-Security-Policy: conservative but allow inline styles for compatibility.
   // Update this policy to match your external assets (fonts, CDNs, analytics) as needed.
+  // Allow https: for connect-src so Clerk and other external APIs can be contacted
   res.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src 'self'"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src 'self' https:"
   )
   res.headers.set("X-Content-Type-Options", "nosniff")
   res.headers.set("X-Frame-Options", "DENY")
@@ -71,6 +72,6 @@ export const config = {
     // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     // Always run for API routes
-    "(api|trpc)(.*)",
+    "/(api|trpc)(.*)",
   ],
 }
