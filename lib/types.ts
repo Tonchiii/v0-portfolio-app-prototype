@@ -21,6 +21,14 @@ export const experiences: Experience[] = [
       "Pursuing degree in Information Technology with focus on software development, cyber security, and database management. Building strong foundation in modern development practices and system architecture.",
     technologies: ["Laravel", "PHP", "Python", "Database Management", "Software Development", "Cyber Security"],
   },
+  {
+    title: "HTML & CSS Certification",
+    company: "Certification Exam",
+    period: "2025",
+    description:
+      "Passed an HTML and CSS certification exam demonstrating proficiency in semantic HTML5, responsive CSS layouts, Flexbox, and Grid.",
+    technologies: ["HTML", "CSS", "Responsive Design", "Flexbox", "Grid"],
+  },
 ]
 
 export const skills: Skill[] = [

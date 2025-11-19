@@ -4,7 +4,8 @@
 export interface Subscriber {
   id: string
   email: string
-  subscribedAt: Date
+  // Use ISO string for persistence and JSON transport
+  subscribedAt: string
   status: "active" | "unsubscribed"
 }
 
@@ -20,27 +21,43 @@ export interface BlogPost {
   imageUrl: string
 }
 
-// Mock subscribers data
-const mockSubscribers: Subscriber[] = [
-  {
-    id: "1",
-    email: "john.doe@example.com",
-    subscribedAt: new Date("2024-01-15"),
-    status: "active",
-  },
-  {
-    id: "2",
-    email: "jane.smith@example.com",
-    subscribedAt: new Date("2024-02-20"),
-    status: "active",
-  },
-  {
-    id: "3",
-    email: "security.pro@example.com",
-    subscribedAt: new Date("2024-03-10"),
-    status: "active",
-  },
+// In-memory list backed by a simple JSON file so subscriptions survive restarts in dev
+import fs from "fs"
+import path from "path"
+
+const DATA_DIR = path.resolve(process.cwd(), "data")
+const SUBSCRIBERS_FILE = path.join(DATA_DIR, "subscribers.json")
+
+function ensureDataDir() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true })
+  } catch (e) {
+    // ignore
+  }
+}
+
+const initialSubscribers: Subscriber[] = [
+  { id: "1", email: "john.doe@example.com", subscribedAt: new Date("2024-01-15").toISOString(), status: "active" },
+  { id: "2", email: "jane.smith@example.com", subscribedAt: new Date("2024-02-20").toISOString(), status: "active" },
+  { id: "3", email: "security.pro@example.com", subscribedAt: new Date("2024-03-10").toISOString(), status: "active" },
 ]
+
+let mockSubscribers: Subscriber[] = []
+
+// Load persisted subscribers if available
+try {
+  ensureDataDir()
+  if (fs.existsSync(SUBSCRIBERS_FILE)) {
+    const raw = fs.readFileSync(SUBSCRIBERS_FILE, "utf-8")
+    mockSubscribers = JSON.parse(raw) as Subscriber[]
+  } else {
+    mockSubscribers = initialSubscribers
+    fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(mockSubscribers, null, 2), "utf-8")
+  }
+} catch (err) {
+  // Fallback to in-memory seeded list
+  mockSubscribers = initialSubscribers
+}
 
 // Mock blog posts data
 export const mockBlogPosts: BlogPost[] = [
@@ -98,15 +115,15 @@ export const mockBlogPosts: BlogPost[] = [
 export async function getSubscribers(): Promise<Subscriber[]> {
   // Simulate database query delay
   await new Promise((resolve) => setTimeout(resolve, 100))
-  return mockSubscribers
+  // Return a shallow copy
+  return [...mockSubscribers]
 }
 
 export async function addSubscriber(email: string): Promise<{ success: boolean; message: string }> {
   // Simulate database query delay
   await new Promise((resolve) => setTimeout(resolve, 100))
-
   // Check if email already exists
-  const exists = mockSubscribers.some((sub) => sub.email === email)
+  const exists = mockSubscribers.some((sub) => sub.email.toLowerCase() === email.toLowerCase())
   if (exists) {
     return { success: false, message: "Email already subscribed" }
   }
@@ -115,11 +132,21 @@ export async function addSubscriber(email: string): Promise<{ success: boolean; 
   const newSubscriber: Subscriber = {
     id: String(mockSubscribers.length + 1),
     email,
-    subscribedAt: new Date(),
+    subscribedAt: new Date().toISOString(),
     status: "active",
   }
 
   mockSubscribers.push(newSubscriber)
+
+  // Persist to disk (best-effort)
+  try {
+    ensureDataDir()
+    fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(mockSubscribers, null, 2), "utf-8")
+  } catch (e) {
+    console.error("[v0] Failed to persist subscribers:", e)
+  }
+
+  console.log(`[v0] New subscriber added: ${email}`)
   return { success: true, message: "Successfully subscribed!" }
 }
 

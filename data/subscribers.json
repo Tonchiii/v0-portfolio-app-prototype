@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "email": "john.doe@example.com",
+    "subscribedAt": "2024-01-15T00:00:00.000Z",
+    "status": "active"
+  },
+  {
+    "id": "2",
+    "email": "jane.smith@example.com",
+    "subscribedAt": "2024-02-20T00:00:00.000Z",
+    "status": "active"
+  },
+  {
+    "id": "3",
+    "email": "security.pro@example.com",
+    "subscribedAt": "2024-03-10T00:00:00.000Z",
+    "status": "active"
+  },
+  {
+    "id": "4",
+    "email": "haha@gmail.com",
+    "subscribedAt": "2025-11-19T15:08:30.348Z",
+    "status": "active"
+  }
+]

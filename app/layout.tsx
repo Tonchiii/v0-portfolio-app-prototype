@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Suspense } from "react"
 import { ClerkProvider } from "@clerk/nextjs"
+import ChatWidget from "@/components/chat-widget"
 
 export const metadata: Metadata = {
   title: "Cybersecurity Specialist | Portfolio",
@@ -24,6 +25,7 @@ export default function RootLayout({
       <html lang="en" className="dark">
         <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
           <Suspense fallback={null}>{children}</Suspense>
+          <ChatWidget />
           <Analytics />
         </body>
       </html>

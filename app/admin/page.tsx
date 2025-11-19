@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button"
 import { getSubscribers } from "@/lib/mock-db"
 import { Users, Mail, TrendingUp, Calendar, Download, Linkedin } from "lucide-react"
 import { AdminHeader } from "@/components/admin-header"
+import AdminDashboardClient from "@/components/admin-dashboard-client"
 
 export default async function AdminDashboard() {
+  // server-rendered metadata still available; main dashboard UI is client-side to allow realtime updates
   const subscribers = await getSubscribers()
   const activeSubscribers = subscribers.filter((sub) => sub.status === "active")
 
@@ -64,60 +66,8 @@ export default async function AdminDashboard() {
             </CardContent>
           </Card>
 
-          {/* Stats cards */}
-          <div className="grid md:grid-cols-4 gap-6">
-            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Subscribers</CardTitle>
-                <Users className="w-4 h-4 text-cyan-400" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{subscribers.length}</div>
-                <p className="text-xs text-muted-foreground mt-1">All time</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Active Subscribers</CardTitle>
-                <Mail className="w-4 h-4 text-green-400" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{activeSubscribers.length}</div>
-                <p className="text-xs text-muted-foreground mt-1">Currently subscribe</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Growth Rate</CardTitle>
-                <TrendingUp className="w-4 h-4 text-blue-400" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">+12%</div>
-                <p className="text-xs text-muted-foreground mt-1">Last 30 days</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">This Month</CardTitle>
-                <Calendar className="w-4 h-4 text-cyan-400" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
-                  {
-                    subscribers.filter((sub) => {
-                      const subDate = new Date(sub.subscribedAt)
-                      const now = new Date()
-                      return subDate.getMonth() === now.getMonth() && subDate.getFullYear() === now.getFullYear()
-                    }).length
-                  }
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">New subscribers</p>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Client-driven realtime dashboard */}
+          <AdminDashboardClient />
 
           {/* Subscribers table */}
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">

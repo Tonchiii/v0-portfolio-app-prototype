@@ -1,8 +1,17 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 import { NextResponse, type NextRequest } from "next/server"
 
-// Protected route matcher stays the same
-const isProtectedRoute = createRouteMatcher(["/admin(.*)"])
+// By default protect all routes except an explicit whitelist (sign-in, sign-up, public assets, api)
+// This makes the app require authentication to view any page. Adjust whitelist as needed.
+const publicPaths = [
+  "/sign-in",
+  "/sign-up",
+  "/_next",
+  "/favicon.ico",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/api",
+]
 
 // Simple in-memory rate limiter (per-process). Good for dev / lightweight edge
 // For production use a distributed store like Redis or Upstash.
@@ -43,9 +52,19 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     // but log in a real app.
   }
 
-  // Protect admin routes with Clerk
-  if (isProtectedRoute(req)) {
-    await auth.protect()
+  // Protect all non-public routes with Clerk
+  try {
+    const pathname = req.nextUrl.pathname
+
+    // Allow anything under the publicPaths or static files to pass through
+    const isPublic = publicPaths.some((p) => pathname === p || pathname.startsWith(p + "/"))
+    const isAsset = pathname.match(/\.[a-zA-Z0-9]+$/)
+    if (!isPublic && !isAsset && !pathname.startsWith("/api/")) {
+      // If not authenticated, this will redirect to the Clerk hosted sign-in or throw - clerk handles redirect
+      await auth.protect()
+    }
+  } catch (e) {
+    // Let clerkMiddleware handle redirects/errors; fall through
   }
 
   // Apply security headers to all responses
@@ -53,10 +72,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
   // Content-Security-Policy: conservative but allow inline styles for compatibility.
   // Update this policy to match your external assets (fonts, CDNs, analytics) as needed.
-  // Allow https: for connect-src so Clerk and other external APIs can be contacted
+  // Allow https: for scripts and connect so Clerk and other external CDNs/APIs can be loaded.
+  // Adjust origins to be more strict in production (prefer explicit domains like https://*.clerk.dev).
   res.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src 'self' https:"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; connect-src 'self' https:"
   )
   res.headers.set("X-Content-Type-Options", "nosniff")
   res.headers.set("X-Frame-Options", "DENY")
