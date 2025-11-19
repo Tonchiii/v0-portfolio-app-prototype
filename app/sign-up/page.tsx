@@ -1,3 +1,5 @@
+"use client"
+
 import { SignUp } from "@clerk/nextjs"
 import { Shield } from "lucide-react"
 import Link from "next/link"
