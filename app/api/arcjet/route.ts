@@ -2,6 +2,9 @@ import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
 import { isSpoofedBot } from "@arcjet/inspect";
 import { NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   rules: [
