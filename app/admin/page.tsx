@@ -17,29 +17,31 @@ export default async function AdminDashboard() {
       <div className="w-full px-4 py-8">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Professional Header with Gradient */}
-          <div className="relative overflow-hidden rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10 p-8 backdrop-blur-sm">
+          <div className="relative overflow-hidden rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 via-blue-500/10 to-purple-500/10 p-4 sm:p-6 md:p-8 backdrop-blur-sm">
             <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
-            <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <Link href="/">
+            <div className="relative flex flex-col gap-4">
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                  <Link href="/" className="w-fit">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="hover:bg-cyan-500/10 hover:border-cyan-400 hover:text-cyan-400 transition-all duration-300 mr-2"
+                      className="hover:bg-cyan-500/10 hover:border-cyan-400 hover:text-cyan-400 transition-all duration-300"
                     >
                       <ArrowLeft className="w-4 h-4 mr-1" />
                       Back
                     </Button>
                   </Link>
-                  <div className="p-2 rounded-xl bg-cyan-500/20 border border-cyan-500/30">
-                    <Shield className="w-6 h-6 text-cyan-400" />
-                  </div>
-                  <div>
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                      Admin Dashboard
-                    </h1>
-                    <p className="text-muted-foreground mt-1">Welcome to the portfolio of Elton James Ramos</p>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-cyan-500/20 border border-cyan-500/30">
+                      <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
+                    </div>
+                    <div>
+                      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        Admin Dashboard
+                      </h1>
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">Portfolio of Elton James Ramos</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -48,7 +50,7 @@ export default async function AdminDashboard() {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <Link href="/#experience">
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-cyan-500/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all duration-300 cursor-pointer group h-full">
                 <CardContent className="p-6">

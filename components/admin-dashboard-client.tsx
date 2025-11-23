@@ -233,16 +233,16 @@ export function AdminDashboardClient() {
           <BarChart3 className="w-5 h-5 text-cyan-400" />
           <h2 className="text-2xl font-bold">Analytics Overview</h2>
         </div>
-        <div className="grid md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <Card className="border-cyan-500/30 bg-gradient-to-br from-cyan-500/10 to-cyan-500/5 backdrop-blur-sm hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-300 group">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Subscribers</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Total Subscribers</CardTitle>
               <div className="p-2 rounded-lg bg-cyan-500/20 border border-cyan-500/30 group-hover:scale-110 transition-transform">
                 <Users className="w-4 h-4 text-cyan-400" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-cyan-400">{subscribers.length}</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-cyan-400">{subscribers.length}</div>
               <div className="flex items-center gap-1 mt-2">
                 <Badge variant="outline" className="border-cyan-500/30 text-cyan-400 text-xs">
                   All time
@@ -332,18 +332,18 @@ export function AdminDashboardClient() {
         </CardHeader>
         <CardContent className="pt-6">
           {/* Search and Filter */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
+          <div className="flex flex-col gap-4 mb-6">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search by email address..."
+                placeholder="Search by email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-secondary/20 border-border/50 focus:border-cyan-500 hover:border-cyan-500/50 transition-all duration-300"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant={filterStatus === "all" ? "default" : "outline"}
                 size="sm"
@@ -365,7 +365,8 @@ export function AdminDashboardClient() {
 
           {/* Subscribers Table */}
           <div className="rounded-lg border border-border/50 overflow-hidden">
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border bg-secondary/20">
@@ -424,6 +425,46 @@ export function AdminDashboardClient() {
               </table>
             </div>
 
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-border/50">
+              {filteredSubscribers.map((subscriber, index) => (
+                <div key={subscriber.id} className="p-4 hover:bg-cyan-500/5 transition-all duration-300">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center border border-cyan-500/30 flex-shrink-0">
+                        <Mail className="w-4 h-4 text-cyan-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground text-sm truncate">{subscriber.email}</p>
+                        <p className="text-xs text-muted-foreground">Subscriber #{index + 1}</p>
+                      </div>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={`flex-shrink-0 ${subscriber.status === "active" 
+                        ? "bg-green-500/10 text-green-400 border-green-500/30" 
+                        : "bg-orange-500/10 text-orange-400 border-orange-500/30"}`}
+                    >
+                      {subscriber.status === "active" ? "✓" : "○"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      <span>
+                        {new Date(subscriber.subscribedAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    <code className="text-xs bg-secondary/50 px-2 py-0.5 rounded border border-border/50">#{subscriber.id}</code>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             {filteredSubscribers.length === 0 && (
               <div className="text-center py-16">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-4">
@@ -444,15 +485,15 @@ export function AdminDashboardClient() {
 
 
       {/* Footer Stats */}
-      <div className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-secondary/20">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-lg border border-border/50 bg-secondary/20">
         <div className="flex items-center gap-2">
           <Eye className="w-4 h-4 text-cyan-400" />
-          <span className="text-sm text-muted-foreground">
-            Active admin viewers: <span className="font-semibold text-cyan-400">{activeViewers}</span>
+          <span className="text-xs sm:text-sm text-muted-foreground">
+            Active viewers: <span className="font-semibold text-cyan-400">{activeViewers}</span>
           </span>
         </div>
         <div className="text-xs text-muted-foreground">
-          Last updated: {new Date().toLocaleTimeString()}
+          Updated: {new Date().toLocaleTimeString()}
         </div>
       </div>
     </div>
