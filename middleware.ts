@@ -4,12 +4,17 @@ import { db } from "@/lib/db"
 import { blocked_users } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 
-// Public routes matcher - ONLY these routes are accessible without authentication
+// Public routes - accessible without authentication
 const isPublicRoute = createRouteMatcher([
+  "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/webhooks(.*)",
+  "/api/subscribers",
+  "/api/resume",
   "/blocked",
+  "/blog(.*)",
+  "/security-plan",
 ])
 
 // Simple in-memory rate limiter (per-process). Good for dev / lightweight edge
