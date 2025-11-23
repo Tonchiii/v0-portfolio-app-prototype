@@ -29,8 +29,10 @@ export default function SignInPage() {
                 card: "bg-card/50 backdrop-blur-sm border-border/50",
               },
             }}
-            fallbackRedirectUrl="/admin"
+            routing="path"
+            path="/sign-in"
             signUpUrl="/sign-up"
+            forceRedirectUrl="/"
           />
         </div>
 

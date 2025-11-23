@@ -38,9 +38,9 @@ export function NewsletterSection() {
 
   return (
     <section id="newsletter" className="py-24 bg-secondary/20">
-      <div className="container px-4">
+      <div className="w-full px-4">
         <div className="max-w-4xl mx-auto">
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
+          <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden hover:border-cyan-500/50 transition-all duration-300 hover:shadow-[0_0_40px_rgba(6,182,212,0.3)]">
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-blue-500/5" />
             <CardHeader className="text-center relative z-10 space-y-4">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-cyan-500/10 border border-cyan-500/20 mx-auto">
@@ -63,12 +63,12 @@ export function NewsletterSection() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={status === "loading" || status === "success"}
-                  className="flex-1 bg-background/50 border-border/50 focus:border-cyan-500"
+                  className="flex-1 bg-background/50 border-border/50 focus:border-cyan-500 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]"
                 />
                 <Button
                   type="submit"
                   disabled={status === "loading" || status === "success"}
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white"
+                  className="bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-300 hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:scale-105"
                 >
                   {status === "loading" ? "Subscribing..." : status === "success" ? "Subscribed!" : "Subscribe"}
                 </Button>

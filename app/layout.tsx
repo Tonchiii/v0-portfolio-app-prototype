@@ -6,7 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Suspense } from "react"
 import { ClerkProvider } from "@clerk/nextjs"
-import ChatWidget from "@/components/chat-widget"
+import AskAI from "@/components/ask-ai"
 
 export const metadata: Metadata = {
   title: "Cybersecurity Specialist | Portfolio",
@@ -22,10 +22,26 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="dark">
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                try {
+                  const theme = localStorage.getItem('theme') || 'system';
+                  if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              `,
+            }}
+          />
+        </head>
         <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
           <Suspense fallback={null}>{children}</Suspense>
-          <ChatWidget />
+          <AskAI />
           <Analytics />
         </body>
       </html>

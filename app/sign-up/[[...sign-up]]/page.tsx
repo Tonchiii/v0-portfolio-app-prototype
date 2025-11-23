@@ -29,8 +29,10 @@ export default function SignUpPage() {
                 card: "bg-card/50 backdrop-blur-sm border-border/50",
               },
             }}
-            redirectUrl="/admin"
+            routing="path"
+            path="/sign-up"
             signInUrl="/sign-in"
+            forceRedirectUrl="/"
           />
         </div>
 

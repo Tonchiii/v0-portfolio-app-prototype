@@ -4,6 +4,7 @@ export interface Experience {
   period: string
   description: string
   technologies: string[]
+  image?: string
 }
 
 export interface Skill {
@@ -22,12 +23,13 @@ export const experiences: Experience[] = [
     technologies: ["Laravel", "PHP", "Python", "Database Management", "Software Development", "Cyber Security"],
   },
   {
-    title: "HTML & CSS Certification",
-    company: "Certification Exam",
-    period: "2025",
+    title: "HTML & CSS Certification (Information Technology Specialist)",
+    company: "Certiport / Pearson VUE",
+    period: "November 6, 2025",
     description:
-      "Passed an HTML and CSS certification exam demonstrating proficiency in semantic HTML5, responsive CSS layouts, Flexbox, and Grid.",
+      "Passed the HTML and CSS certification (Information Technology Specialist). Certificate awarded November 6, 2025. Certificate ID: c69Y-uSrs.",
     technologies: ["HTML", "CSS", "Responsive Design", "Flexbox", "Grid"],
+    image: "/certificates/html-css-cert.png",
   },
 ]
 
@@ -38,4 +40,6 @@ export const skills: Skill[] = [
   { name: "Software Development", category: "security", level: 78 },
   { name: "Cyber Security", category: "security", level: 72 },
   { name: "System Solutions", category: "cloud", level: 70 },
+  { name: "HTML", category: "tools", level: 100 },
+  { name: "CSS", category: "tools", level: 100 },
 ]

@@ -22,17 +22,17 @@ export function Footer() {
             <h3 className="font-semibold">Quick Links</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="#experience" className="text-muted-foreground hover:text-cyan-400 transition-colors">
+                <Link href="#experience" className="text-muted-foreground hover:text-cyan-400 transition-all duration-300 hover:translate-x-1 inline-block hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
                   Experience
                 </Link>
               </li>
               <li>
-                <Link href="#blog" className="text-muted-foreground hover:text-cyan-400 transition-colors">
+                <Link href="#blog" className="text-muted-foreground hover:text-cyan-400 transition-all duration-300 hover:translate-x-1 inline-block hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
                   Blog
                 </Link>
               </li>
               <li>
-                <Link href="#newsletter" className="text-muted-foreground hover:text-cyan-400 transition-colors">
+                <Link href="#newsletter" className="text-muted-foreground hover:text-cyan-400 transition-all duration-300 hover:translate-x-1 inline-block hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
                   Newsletter
                 </Link>
               </li>
@@ -54,13 +54,13 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="font-semibold">Connect</h3>
             <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-cyan-400 transition-colors" aria-label="GitHub">
+              <a href="#" className="text-muted-foreground hover:text-cyan-400 transition-all duration-300 hover:scale-125 hover:drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]" aria-label="GitHub">
                 <Github className="w-5 h-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-cyan-400 transition-colors" aria-label="LinkedIn">
+              <a href="#" className="text-muted-foreground hover:text-cyan-400 transition-all duration-300 hover:scale-125 hover:drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]" aria-label="LinkedIn">
                 <Linkedin className="w-5 h-5" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-cyan-400 transition-colors" aria-label="Twitter">
+              <a href="#" className="text-muted-foreground hover:text-cyan-400 transition-all duration-300 hover:scale-125 hover:drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]" aria-label="Twitter">
                 <Twitter className="w-5 h-5" />
               </a>
             </div>

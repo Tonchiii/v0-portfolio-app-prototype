@@ -39,3 +39,53 @@ export const subscribers = pgTable("subscribers", {
   email: text("email").notNull(),
   created_at: timestamp("created_at").defaultNow(),
 });
+
+// ADMIN USERS TABLE
+export const admin_users = pgTable("admin_users", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  role: text("role").notNull(),
+  status: text("status").notNull(),
+  last_login: text("last_login"),
+  mfa_enabled: text("mfa_enabled").notNull(),
+  login_count: text("login_count").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+// AUDIT LOGS TABLE
+export const audit_logs = pgTable("audit_logs", {
+  id: text("id").primaryKey(),
+  timestamp: text("timestamp").notNull(),
+  event: text("event").notNull(),
+  user: text("user").notNull(),
+  status: text("status").notNull(),
+  ip: text("ip").notNull(),
+  details: text("details").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+});
+
+// VULNERABILITIES TABLE
+export const vulnerabilities = pgTable("vulnerabilities", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  severity: text("severity").notNull(),
+  category: text("category").notNull(),
+  status: text("status").notNull(),
+  discovered: text("discovered").notNull(),
+  cve: text("cve"),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});
+
+// NETWORK ALERTS TABLE
+export const network_alerts = pgTable("network_alerts", {
+  id: text("id").primaryKey(),
+  timestamp: text("timestamp").notNull(),
+  type: text("type").notNull(),
+  severity: text("severity").notNull(),
+  source: text("source").notNull(),
+  description: text("description").notNull(),
+  created_at: timestamp("created_at").defaultNow(),
+});

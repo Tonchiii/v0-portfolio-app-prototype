@@ -1,35 +1,36 @@
+"use client"
 import { Button } from "@/components/ui/button"
-import { Shield, MapPin, Mail, Phone, Linkedin } from "lucide-react"
+import { Shield, MapPin, Mail, Phone, Linkedin, Eye } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
 export function HeroSection() {
+  const handleViewResume = () => {
+    // Open the resume page/image in a new tab
+    window.open("/api/resume", "_blank")
+  }
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Animated background grid */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/20">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f12_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f12_1px,transparent_1px)] bg-[size:4rem_4rem]" />
-      </div>
+      {/* Gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/20" />
 
       {/* Glowing orbs for depth */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
 
       <div className="container relative z-10 px-4 py-20">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <div className="flex flex-col md:flex-row items-center gap-8 mb-12">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-12">
             <div className="relative">
-              <div className="w-48 h-64 rounded-2xl overflow-hidden border-4 border-cyan-500/30 shadow-2xl shadow-cyan-500/20 bg-secondary/50">
+              <div className="w-72 h-72 rounded-full overflow-hidden border-4 border-cyan-500/50 shadow-2xl shadow-cyan-500/40 bg-secondary/50 hover:border-cyan-400 hover:shadow-[0_0_80px_rgba(6,182,212,0.8)] hover:scale-105 transition-all duration-300 cursor-pointer">
                 <Image
                   src="/profile-photo-full.jpg"
                   alt="Elton James T. Ramos"
-                  width={192}
-                  height={256}
-                  className="object-cover object-top"
+                  width={288}
+                  height={288}
+                  className="object-cover object-top hover:scale-110 transition-transform duration-300"
                 />
-              </div>
-              <div className="absolute -bottom-3 -right-3 bg-cyan-500 rounded-full p-3 shadow-lg">
-                <Shield className="w-6 h-6 text-white" />
               </div>
             </div>
 
@@ -37,20 +38,25 @@ export function HeroSection() {
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight">ELTON JAMES T. RAMOS</h1>
               <p className="text-lg text-muted-foreground">IT Student & Software Developer</p>
               <div className="flex flex-wrap gap-4 justify-center md:justify-start text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
+                <a 
+                  href="https://www.google.com/maps/search/Neon+Tex+Bantex+Caloocan+City+Manila/@14.6507,120.9833,17z" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 hover:text-cyan-400 transition-all duration-300 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] cursor-pointer"
+                >
                   <MapPin className="w-4 h-4 text-cyan-400" />
                   <span>Calocan City, Manila</span>
-                </div>
+                </a>
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-cyan-400" />
-                  <a href="mailto:eltonramos417@gmail.com" className="hover:text-cyan-400 transition-colors">
+                  <a href="mailto:eltonramos417@gmail.com" className="hover:text-cyan-400 transition-all duration-300 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
                     eltonramos417@gmail.com
                   </a>
                 </div>
-                <div className="flex items-center gap-2">
+                <a href="tel:+639919043753" className="flex items-center gap-2 hover:text-cyan-400 transition-all duration-300 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] cursor-pointer">
                   <Phone className="w-4 h-4 text-cyan-400" />
                   <span>09919043753</span>
-                </div>
+                </a>
               </div>
             </div>
           </div>
@@ -72,60 +78,76 @@ export function HeroSection() {
           </h2>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto text-pretty leading-relaxed text-center">
-            Detail-oriented IT student with experience in software development and cyber security. Skilled in
-            PHP/Laravel, Python, and database management. Seeking to apply my technical skills in an innovative role to
+            HTML and CSS Specialist and Detail-oriented IT student with experience in software development and cyber security. Skilled in
+            PHP/Laravel, Python, HTML&CSS and database management. Seeking to apply my technical skills in an innovative role to
             contribute to efficient system solutions.
           </p>
 
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Button size="lg" className="text-lg px-8 bg-cyan-600 hover:bg-cyan-700 text-white" asChild>
+            <Button size="lg" className="text-lg px-8 bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] hover:scale-105" asChild>
               <Link href="#experience">View Experience</Link>
             </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent" asChild>
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-lg px-8 bg-transparent hover:bg-green-500/10 hover:border-green-400 hover:text-green-400 transition-all duration-300 hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:scale-105"
+              onClick={handleViewResume}
+            >
+              <Eye className="w-5 h-5 mr-2" />
+              View Resume
+            </Button>
+            <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent hover:bg-cyan-500/10 hover:border-cyan-400 transition-all duration-300 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:scale-105" asChild>
               <Link href="#blog">Read Blog</Link>
             </Button>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-12 max-w-4xl mx-auto">
-            <div className="space-y-2">
+            <div className="space-y-2 text-center">
               <div className="flex items-center justify-center">
                 <Shield className="w-8 h-8 text-cyan-400" />
               </div>
-              <div className="text-3xl font-bold text-foreground">BSc IT</div>
+              <div className="text-3xl font-bold text-foreground">BSIT</div>
               <div className="text-sm text-muted-foreground">Information Technology</div>
             </div>
-            <div className="space-y-2">
+            <a 
+              href="https://www.linkedin.com/in/elton-james-ramos-7a4731386/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="space-y-2 text-center hover:scale-105 transition-transform duration-300 cursor-pointer group"
+            >
               <div className="flex items-center justify-center">
-                <Linkedin className="w-8 h-8 text-blue-400" />
+                <Linkedin className="w-8 h-8 text-blue-400 group-hover:text-blue-300 transition-colors" />
               </div>
-              <div className="text-3xl font-bold text-foreground">Active</div>
-              <div className="text-sm text-muted-foreground">LinkedIn Profile</div>
-            </div>
-            <div className="space-y-2">
+              <div className="text-3xl font-bold text-foreground group-hover:text-blue-400 transition-colors">Active</div>
+              <div className="text-sm text-muted-foreground group-hover:text-blue-300 transition-colors">LinkedIn Profile</div>
+            </a>
+            <a 
+              href="mailto:eltonramos417@gmail.com"
+              className="space-y-2 text-center hover:scale-105 transition-transform duration-300 cursor-pointer group"
+            >
               <div className="flex items-center justify-center">
-                <Mail className="w-8 h-8 text-cyan-400" />
+                <Mail className="w-8 h-8 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
               </div>
-              <div className="text-3xl font-bold text-foreground">Available</div>
-              <div className="text-sm text-muted-foreground">For Opportunities</div>
-            </div>
-            <div className="space-y-2">
+              <div className="text-3xl font-bold text-foreground group-hover:text-cyan-400 transition-colors">Available</div>
+              <div className="text-sm text-muted-foreground group-hover:text-cyan-300 transition-colors">For Opportunities</div>
+            </a>
+            <a 
+              href="https://www.google.com/maps/search/Neon+Tex+Bantex+Caloocan+City+Manila/@14.6507,120.9833,17z" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="space-y-2 text-center hover:scale-105 transition-transform duration-300 cursor-pointer group"
+            >
               <div className="flex items-center justify-center">
-                <MapPin className="w-8 h-8 text-blue-400" />
+                <MapPin className="w-8 h-8 text-blue-400 group-hover:text-blue-300 transition-colors" />
               </div>
-              <div className="text-3xl font-bold text-foreground">Manila</div>
-              <div className="text-sm text-muted-foreground">Philippines</div>
-            </div>
+              <div className="text-3xl font-bold text-foreground group-hover:text-blue-400 transition-colors">Manila</div>
+              <div className="text-sm text-muted-foreground group-hover:text-blue-300 transition-colors">Philippines</div>
+            </a>
           </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 rounded-full border-2 border-muted-foreground/30 flex items-start justify-center p-2">
-          <div className="w-1 h-3 rounded-full bg-muted-foreground/50" />
-        </div>
-      </div>
     </section>
   )
 }
