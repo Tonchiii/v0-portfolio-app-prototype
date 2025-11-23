@@ -901,17 +901,17 @@ export function SecurityAdminDashboard() {
               {users.map((user) => (
                 <div
                   key={user.id}
-                  className="flex items-center justify-between p-4 rounded-lg border border-border bg-secondary/20 hover:border-cyan-500/50 transition-all"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 rounded-lg border border-border bg-secondary/20 hover:border-cyan-500/50 transition-all gap-4"
                 >
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center border border-cyan-500/30">
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center border border-cyan-500/30 flex-shrink-0">
                       <span className="text-sm font-bold text-cyan-400">
                         {user.name.split(" ").map(n => n[0]).join("").toUpperCase()}
                       </span>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{user.name}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-medium truncate">{user.name}</p>
                         <Badge className={getRoleBadgeColor(user.role)}>
                           {user.role}
                         </Badge>
@@ -928,8 +928,8 @@ export function SecurityAdminDashboard() {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                      <div className="flex items-center gap-4 mt-1">
+                      <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                      <div className="flex items-center gap-4 mt-1 flex-wrap">
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           Last login: {user.lastLogin}
@@ -941,11 +941,11 @@ export function SecurityAdminDashboard() {
                     </div>
                   </div>
                   {isAdmin && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end">
                       <select
                         value={user.role}
                         onChange={(e) => handleChangeRole(user.id, e.target.value as any)}
-                        className="px-2 py-1 rounded-md border border-border bg-background text-xs"
+                        className="px-3 py-2 rounded-md border border-border bg-background text-xs min-w-[90px]"
                         disabled={user.email === "eltonramos417@gmail.com"}
                       >
                         <option value="admin">Admin</option>
@@ -956,7 +956,7 @@ export function SecurityAdminDashboard() {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleToggleMFA(user.id)}
-                        className="text-xs"
+                        className="text-xs p-2 h-9 w-9"
                         title={user.mfaEnabled ? "MFA Enabled" : "MFA Disabled"}
                       >
                         {user.mfaEnabled ? (
@@ -971,7 +971,7 @@ export function SecurityAdminDashboard() {
                             size="sm"
                             variant="ghost"
                             onClick={() => user.blocked ? handleUnblockUser(user.id, user.email) : handleBlockUser(user.id, user.email)}
-                            className={user.blocked ? "text-green-400 hover:text-green-300 hover:bg-green-500/10" : "text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"}
+                            className={`text-xs p-2 h-9 w-9 ${user.blocked ? "text-green-400 hover:text-green-300 hover:bg-green-500/10" : "text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"}`}
                             title={user.blocked ? "Unblock User" : "Block User"}
                           >
                             {user.blocked ? (
@@ -984,7 +984,7 @@ export function SecurityAdminDashboard() {
                             size="sm"
                             variant="ghost"
                             onClick={() => handleRemoveUser(user.id)}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs p-2 h-9 w-9"
                             title="Delete User"
                           >
                             <Trash2 className="w-4 h-4" />
