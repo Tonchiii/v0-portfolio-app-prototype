@@ -300,29 +300,41 @@ export default function SecurityCenterPage() {
 
   const handleConnectOAuth = async (provider: "oauth_google" | "oauth_github") => {
     try {
-      const redirect = `${window.location.origin}/security`
+      // Use Clerk's built-in OAuth flow
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+      const redirectUrl = `${baseUrl}/security`
+      
       await user?.createExternalAccount({
         strategy: provider,
-        redirectUrl: redirect,
-        redirect_url: redirect,
+        redirectUrl: redirectUrl,
       })
+      
+      // Clerk will handle the redirect to the OAuth provider
+      // and return to the redirectUrl after authentication
     } catch (error: any) {
       console.error(`Error connecting ${provider}:`, error)
-      alert(error?.errors?.[0]?.message || `Failed to connect ${provider}`)
+      const errorMessage = error?.errors?.[0]?.longMessage || error?.errors?.[0]?.message || `Failed to connect ${provider}`
+      alert(`OAuth Connection Error: ${errorMessage}\n\nPlease ensure your production domain is added in Clerk Dashboard under "Domains".`)
     }
   }
 
   const handleDisconnectOAuth = async (externalAccountId: string) => {
+    if (!confirm('Are you sure you want to disconnect this account?')) {
+      return
+    }
+    
     try {
       const account = user?.externalAccounts?.find(acc => acc.id === externalAccountId)
       if (account) {
         await account.destroy()
         // Reload user data to reflect changes
         await user?.reload()
+        alert('Account disconnected successfully!')
       }
     } catch (error: any) {
       console.error("Error disconnecting account:", error)
-      alert(error?.errors?.[0]?.message || "Failed to disconnect account")
+      const errorMessage = error?.errors?.[0]?.longMessage || error?.errors?.[0]?.message || "Failed to disconnect account"
+      alert(`Disconnect Error: ${errorMessage}`)
     }
   }
 
