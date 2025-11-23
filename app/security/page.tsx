@@ -19,8 +19,9 @@ import {
   ExternalLink,
   Trash2,
   LogOut,
-  Chrome,
-  ArrowLeft
+  ShieldAlert,
+  ArrowLeft,
+  Chrome
 } from "lucide-react"
 import { useState, useEffect } from "react"
 
@@ -50,6 +51,40 @@ export default function SecurityCenterPage() {
   const [phoneNumber, setPhoneNumber] = useState<string>("") 
   const [phoneInput, setPhoneInput] = useState<string>("")
   const [showPhoneInput, setShowPhoneInput] = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
+  const [isCheckingRole, setIsCheckingRole] = useState(true)
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      try {
+        if (!user?.primaryEmailAddress?.emailAddress) {
+          setIsCheckingRole(false)
+          return
+        }
+
+        const response = await fetch('/api/admin/manage-users')
+        if (!response.ok) {
+          setUserRole('user')
+          setIsCheckingRole(false)
+          return
+        }
+
+        const users = await response.json()
+        const currentUser = users.find(
+          (u: any) => u.email === user.primaryEmailAddress?.emailAddress
+        )
+        
+        setUserRole(currentUser?.role || 'user')
+        setIsCheckingRole(false)
+      } catch (error) {
+        console.error('Error checking user role:', error)
+        setUserRole('user')
+        setIsCheckingRole(false)
+      }
+    }
+
+    checkUserRole()
+  }, [user])
 
   useEffect(() => {
     // Load sessions from localStorage or initialize with defaults
@@ -93,7 +128,7 @@ export default function SecurityCenterPage() {
     }
   }, [user])
 
-  if (!isLoaded) {
+  if (!isLoaded || isCheckingRole) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -106,6 +141,53 @@ export default function SecurityCenterPage() {
 
   if (!isSignedIn) {
     redirect("/sign-in")
+  }
+
+  if (userRole && userRole !== 'admin') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-cyan-950/10">
+        <div className="max-w-md w-full mx-4">
+          <Card className="border-red-500/20 bg-card/50 backdrop-blur-sm">
+            <CardHeader className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center">
+                <ShieldAlert className="w-8 h-8 text-red-500" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl text-red-500">Access Denied</CardTitle>
+                <CardDescription className="mt-2">
+                  This page is restricted to administrators only
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 rounded-lg bg-red-500/5 border border-red-500/20">
+                <p className="text-sm text-muted-foreground">
+                  You need administrator permissions to access the Security Center. 
+                  If you believe this is an error, please contact the system administrator.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Button 
+                  onClick={() => router.push('/')} 
+                  className="w-full"
+                  variant="default"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Return to Home
+                </Button>
+                <Button 
+                  onClick={() => router.push('/admin')} 
+                  className="w-full"
+                  variant="outline"
+                >
+                  Go to Dashboard
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   const getBrowserIcon = (browser: string) => {

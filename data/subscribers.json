@@ -28,5 +28,11 @@
     "email": "Nelson@gmail.com",
     "subscribedAt": "2025-11-23T07:42:43.307Z",
     "status": "active"
+  },
+  {
+    "id": "6",
+    "email": "nijjanu@gmail.com",
+    "subscribedAt": "2025-11-23T13:39:27.927Z",
+    "status": "active"
   }
 ]

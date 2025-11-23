@@ -5,6 +5,7 @@ export interface Experience {
   description: string
   technologies: string[]
   image?: string
+  link?: string
 }
 
 export interface Skill {
@@ -30,6 +31,55 @@ export const experiences: Experience[] = [
       "Passed the HTML and CSS certification (Information Technology Specialist). Certificate awarded November 6, 2025. Certificate ID: c69Y-uSrs.",
     technologies: ["HTML", "CSS", "Responsive Design", "Flexbox", "Grid"],
     image: "/certificates/html-css-cert.png",
+  },
+  {
+    title: "Dental Clinic Appointment Management System with Decision Support",
+    company: "St. Paul University Philippines - Capstone Project",
+    period: "2024-2025",
+    description:
+      "Published capstone project in The Light Explorer journal. Developed a comprehensive appointment management system with decision support for dental clinics, featuring real-time booking, automated reminders, centralized patient records, and urgency-based scheduling. Evaluated by IT experts and achieved 'Very Great Extent' compliance with ISO/IEC 25010 software quality standards. Co-authored with Erika Kaye Bancud, Sheena Gumarang, and Marifel Grace C. Kummer.",
+    technologies: ["Health Informatics", "Decision Support Systems", "Database Management", "ISO/IEC 25010", "Patient Management", "Scheduling Algorithms"],
+    link: "https://www.thelight-explorer.com/dental-clinic-appointment-management-system/",
+  },
+  {
+    title: "CyberSummit 2022",
+    company: "St. Paul University Philippines",
+    period: "2022",
+    description:
+      "Participated in CyberSummit 2022, a cybersecurity conference focused on emerging threats, security best practices, and ethical hacking techniques.",
+    technologies: ["Cybersecurity", "Ethical Hacking", "Security Best Practices", "Threat Analysis"],
+  },
+  {
+    title: "CyberSummit 2023",
+    company: "St. Paul University Philippines",
+    period: "2023",
+    description:
+      "Participated in CyberSummit 2023, advancing knowledge in network security, penetration testing, and modern cybersecurity frameworks.",
+    technologies: ["Network Security", "Penetration Testing", "Security Frameworks", "Threat Detection"],
+  },
+  {
+    title: "CyberSummit 2024",
+    company: "St. Paul University Philippines",
+    period: "2024",
+    description:
+      "Participated in CyberSummit 2024, focusing on advanced threat intelligence, cloud security, and incident response strategies.",
+    technologies: ["Cloud Security", "Threat Intelligence", "Incident Response", "Security Operations"],
+  },
+  {
+    title: "HackTheNorth Seminar 2025",
+    company: "St. Paul University Philippines",
+    period: "2025",
+    description:
+      "Participated in HackTheNorth Seminar 2025, exploring cutting-edge hacking techniques, vulnerability assessment, and defensive security measures.",
+    technologies: ["Vulnerability Assessment", "Defensive Security", "Hacking Techniques", "Security Tools"],
+  },
+  {
+    title: "Rich Media Film Showing - 1st Runner Up",
+    company: "St. Paul University Philippines",
+    period: "2024",
+    description:
+      "Achieved 1st Runner Up in Rich Media Film Showing competition, demonstrating creativity and technical skills in multimedia production.",
+    technologies: ["Video Production", "Multimedia", "Storytelling", "Creative Design"],
   },
 ]
 

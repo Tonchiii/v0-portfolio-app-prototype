@@ -10,7 +10,7 @@ import {
   Eye, EyeOff, Lock, Unlock, Clock, Globe, Server, Database,
   FileText, TrendingUp, TrendingDown, Wifi, MonitorDot, Bell,
   CheckCircle2, XCircle, Info, AlertCircle, Search, Filter,
-  Download, RefreshCw, Settings, UserPlus, Key, Smartphone
+  Download, RefreshCw, Settings, UserPlus, Key, Smartphone, Ban
 } from "lucide-react"
 
 interface User {
@@ -22,6 +22,7 @@ interface User {
   lastLogin: string
   mfaEnabled: boolean
   loginCount: number
+  blocked?: boolean
 }
 
 interface AuditLog {
@@ -76,18 +77,66 @@ export function SecurityAdminDashboard() {
     const fetchAndProcessUsers = async () => {
       setIsLoadingUsers(true)
       
+      // First, load existing users from database
+      let dbUsers: User[] = []
+      try {
+        const dbResponse = await fetch('/api/admin/manage-users')
+        if (dbResponse.ok) {
+          const dbData = await dbResponse.json()
+          dbUsers = dbData.map((u: any) => ({
+            id: u.id,
+            name: u.name,
+            email: u.email,
+            role: u.role as "admin" | "user" | "guest",
+            status: u.status,
+            lastLogin: u.last_login,
+            mfaEnabled: u.mfa_enabled === "true",
+            loginCount: parseInt(u.login_count) || 0
+          }))
+        }
+      } catch (error) {
+        console.error("Error loading database users:", error)
+      }
+      
+      // Fetch blocked users
+      let blockedUserIds = new Set<string>()
+      try {
+        const blockedRes = await fetch('/api/admin/block-user')
+        if (blockedRes.ok) {
+          const blockedJson = await blockedRes.json()
+          blockedUserIds = new Set(blockedJson.blocked_users?.map((u: any) => u.user_id) || [])
+        }
+      } catch (error) {
+        console.error("Error loading blocked users:", error)
+      }
+      
       // Fetch users from Clerk API
       try {
         const response = await fetch('/api/admin/users')
         if (response.ok) {
           const clerkUsers = await response.json()
           
-          // Process users and assign roles
+          // Process users and merge with database data
           const processedUsers: User[] = clerkUsers.map((cu: any) => {
             const email = cu.emailAddresses?.[0]?.emailAddress || cu.email || ''
             const name = cu.fullName || cu.firstName || cu.lastName || email.split('@')[0]
             
-            // Determine role based on email
+            // Check if user exists in database
+            const existingUser = dbUsers.find(u => u.email === email)
+            
+            // If user exists in database, use their stored role and data
+            if (existingUser) {
+              return {
+                ...existingUser,
+                name: name, // Update name from Clerk
+                lastLogin: cu.lastSignInAt ? new Date(cu.lastSignInAt).toLocaleString() : existingUser.lastLogin,
+                mfaEnabled: cu.twoFactorEnabled || existingUser.mfaEnabled,
+                status: cu.banned ? "inactive" : existingUser.status,
+                blocked: blockedUserIds.has(cu.id),
+              }
+            }
+            
+            // New user - determine initial role
             let role: "admin" | "user" | "guest"
             if (email === "eltonramos417@gmail.com") {
               role = "admin"
@@ -97,6 +146,11 @@ export function SecurityAdminDashboard() {
               role = "user"
             }
             
+            // Calculate realistic login count based on account age
+            const createdDate = new Date(cu.createdAt)
+            const daysSinceCreation = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
+            const estimatedLogins = Math.max(1, Math.min(daysSinceCreation * 2, 50))
+            
             return {
               id: cu.id,
               name: name,
@@ -105,28 +159,38 @@ export function SecurityAdminDashboard() {
               status: cu.banned ? "inactive" : "active",
               lastLogin: cu.lastSignInAt ? new Date(cu.lastSignInAt).toLocaleString() : "Never",
               mfaEnabled: cu.twoFactorEnabled || false,
-              loginCount: Math.floor(Math.random() * 300) // Simulated
+              loginCount: estimatedLogins,
+              blocked: blockedUserIds.has(cu.id),
             }
           })
           
+          // Filter out users that were deleted (exist in Clerk but not in db and db has data)
+          const finalUsers = dbUsers.length > 0 
+            ? processedUsers.filter(pu => dbUsers.some(du => du.email === pu.email))
+            : processedUsers
+          
           // Add current user if not in list
-          if (clerkUser && !processedUsers.find(u => u.email === clerkUser.primaryEmailAddress?.emailAddress)) {
-            processedUsers.unshift({
+          if (clerkUser && !finalUsers.find(u => u.email === clerkUser.primaryEmailAddress?.emailAddress)) {
+            const currentUserEmail = clerkUser.primaryEmailAddress?.emailAddress || ""
+            const existingCurrentUser = dbUsers.find(u => u.email === currentUserEmail)
+            
+            finalUsers.unshift({
               id: clerkUser.id,
               name: clerkUser.fullName || clerkUser.firstName || "Current User",
-              email: clerkUser.primaryEmailAddress?.emailAddress || "",
-              role: clerkUser.primaryEmailAddress?.emailAddress === "eltonramos417@gmail.com" ? "admin" : "user",
+              email: currentUserEmail,
+              role: existingCurrentUser?.role || (currentUserEmail === "eltonramos417@gmail.com" ? "admin" : "user"),
               status: "active",
               lastLogin: "Just now",
               mfaEnabled: clerkUser.twoFactorEnabled || false,
-              loginCount: 1
+              loginCount: existingCurrentUser?.loginCount || 1,
+              blocked: blockedUserIds.has(clerkUser.id),
             })
           }
           
-          setUsers(processedUsers)
+          setUsers(finalUsers)
           
-          // Save/update users in database
-          for (const user of processedUsers) {
+          // Save/update users in database (only new or updated users)
+          for (const user of finalUsers) {
             await fetch('/api/admin/manage-users', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -159,7 +223,6 @@ export function SecurityAdminDashboard() {
     }
 
     fetchAndProcessUsers()
-    setIsMounted(true)
 
     // Load data from database
     const loadDatabaseData = async () => {
@@ -196,7 +259,7 @@ export function SecurityAdminDashboard() {
       const initialLogs: AuditLog[] = [
       {
         id: "1",
-        timestamp: new Date().toISOString(),
+        timestamp: "2025-11-23T12:00:00.000Z",
         event: "User Login",
         user: "eltonramos417@gmail.com",
         status: "success",
@@ -205,7 +268,7 @@ export function SecurityAdminDashboard() {
       },
       {
         id: "2",
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
+        timestamp: "2025-11-23T11:00:00.000Z",
         event: "Failed Login Attempt",
         user: "unknown@suspicious.com",
         status: "failed",
@@ -214,7 +277,7 @@ export function SecurityAdminDashboard() {
       },
       {
         id: "3",
-        timestamp: new Date(Date.now() - 7200000).toISOString(),
+        timestamp: "2025-11-23T10:00:00.000Z",
         event: "Password Changed",
         user: "john.doe@example.com",
         status: "success",
@@ -223,7 +286,7 @@ export function SecurityAdminDashboard() {
       },
       {
         id: "4",
-        timestamp: new Date(Date.now() - 10800000).toISOString(),
+        timestamp: "2025-11-23T09:00:00.000Z",
         event: "SQL Injection Blocked",
         user: "attacker@malicious.com",
         status: "warning",
@@ -232,7 +295,7 @@ export function SecurityAdminDashboard() {
       },
       {
         id: "5",
-        timestamp: new Date(Date.now() - 14400000).toISOString(),
+        timestamp: "2025-11-23T08:00:00.000Z",
         event: "MFA Enabled",
         user: "jane.smith@example.com",
         status: "success",
@@ -296,7 +359,7 @@ export function SecurityAdminDashboard() {
       const initialAlerts: NetworkAlert[] = [
       {
         id: "1",
-        timestamp: new Date(Date.now() - 1800000).toISOString(),
+        timestamp: "2025-11-23T11:30:00.000Z",
         type: "firewall",
         severity: "high",
         source: "185.220.101.45",
@@ -304,7 +367,7 @@ export function SecurityAdminDashboard() {
       },
       {
         id: "2",
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
+        timestamp: "2025-11-23T11:00:00.000Z",
         type: "ids",
         severity: "critical",
         source: "45.33.32.156",
@@ -312,7 +375,7 @@ export function SecurityAdminDashboard() {
       },
       {
         id: "3",
-        timestamp: new Date(Date.now() - 5400000).toISOString(),
+        timestamp: "2025-11-23T10:30:00.000Z",
         type: "bandwidth",
         severity: "medium",
         source: "192.168.1.120",
@@ -320,7 +383,7 @@ export function SecurityAdminDashboard() {
       },
       {
         id: "4",
-        timestamp: new Date(Date.now() - 7200000).toISOString(),
+        timestamp: "2025-11-23T10:00:00.000Z",
         type: "firewall",
         severity: "medium",
         source: "203.0.113.42",
@@ -361,6 +424,9 @@ export function SecurityAdminDashboard() {
     }
 
     initializeData()
+    
+    // Set mounted after all initialization is complete
+    setIsMounted(true)
   }, [clerkUser])
 
   const handleAddUser = async () => {
@@ -429,6 +495,76 @@ export function SecurityAdminDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(user)
       })
+    }
+  }
+
+  const handleBlockUser = async (userId: string, email: string) => {
+    if (!confirm(`Are you sure you want to block ${email}? They will not be able to view the portfolio.`)) {
+      return
+    }
+
+    try {
+      console.log('Blocking user:', { userId, email })
+      
+      const res = await fetch('/api/admin/block-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, email, reason: 'Blocked by admin' })
+      })
+
+      console.log('Response status:', res.status)
+      const text = await res.text()
+      console.log('Response text:', text)
+      
+      let json
+      try {
+        json = JSON.parse(text)
+      } catch {
+        alert(`Server error: ${text.substring(0, 200)}`)
+        return
+      }
+      
+      if (res.ok) {
+        const updatedUsers = users.map(u => 
+          u.id === userId ? { ...u, blocked: true } : u
+        )
+        setUsers(updatedUsers)
+        alert(`User ${email} has been blocked successfully.`)
+      } else {
+        console.error('Block user error:', json)
+        alert(`Failed to block user: ${json.error || JSON.stringify(json)}`)
+      }
+    } catch (err: any) {
+      console.error('Block user exception:', err)
+      alert(`Error blocking user: ${err.message || err.toString()}`)
+    }
+  }
+
+  const handleUnblockUser = async (userId: string, email: string) => {
+    if (!confirm(`Are you sure you want to unblock ${email}?`)) {
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/admin/block-user?user_id=${userId}`, {
+        method: 'DELETE'
+      })
+
+      const json = await res.json()
+      
+      if (res.ok) {
+        const updatedUsers = users.map(u => 
+          u.id === userId ? { ...u, blocked: false } : u
+        )
+        setUsers(updatedUsers)
+        alert(`User ${email} has been unblocked successfully.`)
+      } else {
+        console.error('Unblock user error:', json)
+        alert(`Failed to unblock user: ${json.error || 'Unknown error'}`)
+      }
+    } catch (err: any) {
+      console.error('Unblock user exception:', err)
+      alert(`Error unblocking user: ${err.message || 'Please try again.'}`)
     }
   }
 
@@ -785,6 +921,12 @@ export function SecurityAdminDashboard() {
                             MFA
                           </Badge>
                         )}
+                        {user.blocked && (
+                          <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">
+                            <Ban className="w-3 h-3 mr-1" />
+                            Blocked
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground">{user.email}</p>
                       <div className="flex items-center gap-4 mt-1">
@@ -815,6 +957,7 @@ export function SecurityAdminDashboard() {
                         variant="ghost"
                         onClick={() => handleToggleMFA(user.id)}
                         className="text-xs"
+                        title={user.mfaEnabled ? "MFA Enabled" : "MFA Disabled"}
                       >
                         {user.mfaEnabled ? (
                           <Lock className="w-4 h-4 text-green-400" />
@@ -823,14 +966,30 @@ export function SecurityAdminDashboard() {
                         )}
                       </Button>
                       {user.email !== "eltonramos417@gmail.com" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleRemoveUser(user.id)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => user.blocked ? handleUnblockUser(user.id, user.email) : handleBlockUser(user.id, user.email)}
+                            className={user.blocked ? "text-green-400 hover:text-green-300 hover:bg-green-500/10" : "text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"}
+                            title={user.blocked ? "Unblock User" : "Block User"}
+                          >
+                            {user.blocked ? (
+                              <CheckCircle2 className="w-4 h-4" />
+                            ) : (
+                              <Ban className="w-4 h-4" />
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleRemoveUser(user.id)}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            title="Delete User"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </>
                       )}
                     </div>
                   )}

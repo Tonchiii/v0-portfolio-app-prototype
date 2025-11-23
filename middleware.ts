@@ -1,17 +1,21 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 import { NextResponse, type NextRequest } from "next/server"
+import { db } from "@/lib/db"
+import { blocked_users } from "@/lib/schema"
+import { eq } from "drizzle-orm"
 
 // Public routes matcher - ONLY these routes are accessible without authentication
 const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/webhooks(.*)",
+  "/blocked",
 ])
 
 // Simple in-memory rate limiter (per-process). Good for dev / lightweight edge
 // For production use a distributed store like Redis or Upstash.
 const RATE_LIMIT_WINDOW_MS = 60_000 // 1 minute
-const RATE_LIMIT_MAX = 100
+const RATE_LIMIT_MAX = process.env.NODE_ENV === "development" ? 1000 : 100 // Higher limit for dev
 const rateLimitStore = new Map<string, { count: number; reset: number }>()
 
 function getIP(req: NextRequest) {
@@ -50,6 +54,21 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   // Protect ALL routes except public routes (sign-in, sign-up)
   if (!isPublicRoute(req)) {
     await auth.protect()
+  }
+
+  // Check if user is blocked (only for authenticated users)
+  const { userId } = await auth()
+  if (userId && !isPublicRoute(req) && req.nextUrl.pathname !== "/blocked") {
+    try {
+      const blockedUser = await db.select().from(blocked_users).where(eq(blocked_users.user_id, userId))
+      if (blockedUser.length > 0) {
+        // Redirect blocked users to the blocked page
+        return NextResponse.redirect(new URL("/blocked", req.url))
+      }
+    } catch (err) {
+      // If check fails, log but continue (don't break the app)
+      console.error("Error checking blocked user:", err)
+    }
   }
 
   // Apply security headers to all responses

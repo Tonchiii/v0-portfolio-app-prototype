@@ -14,17 +14,6 @@ type Subscriber = {
   status: "active" | "unsubscribed"
 }
 
-type RegisteredUser = {
-  id: string
-  email: string
-  firstName: string | null
-  lastName: string | null
-  imageUrl: string
-  createdAt: string
-  lastSignInAt: string | null
-  emailVerified: boolean
-}
-
 function calcGrowthRate(subscribers: Subscriber[]) {
   const now = new Date()
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
@@ -42,8 +31,6 @@ export function AdminDashboardClient() {
   const [activeViewers, setActiveViewers] = useState<number>(0)
   const [searchQuery, setSearchQuery] = useState<string>("")
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "unsubscribed">("all")
-  const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([])
-  const [userSearchQuery, setUserSearchQuery] = useState<string>("")
 
   // client id for presence tracking
   useEffect(() => {
@@ -101,27 +88,7 @@ export function AdminDashboardClient() {
     }
   }, [])
 
-  // fetch registered users from Clerk
-  useEffect(() => {
-    let mounted = true
 
-    async function fetchUsers() {
-      try {
-        const res = await fetch(`/api/admin/users`, { cache: "no-store" })
-        const json = await res.json()
-        if (mounted && Array.isArray(json.users)) setRegisteredUsers(json.users)
-      } catch (e) {
-        // ignore in prototype
-      }
-    }
-
-    fetchUsers()
-    const i = setInterval(fetchUsers, 10_000) // refresh every 10 seconds
-    return () => {
-      mounted = false
-      clearInterval(i)
-    }
-  }, [])
 
   const activeSubscribers = subscribers.filter((s) => s.status === "active").length
   const growth = calcGrowthRate(subscribers)
@@ -136,13 +103,6 @@ export function AdminDashboardClient() {
     const matchesSearch = sub.email.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesFilter = filterStatus === "all" || sub.status === filterStatus
     return matchesSearch && matchesFilter
-  })
-
-  // Filter registered users based on search
-  const filteredUsers = registeredUsers.filter((user) => {
-    const searchLower = userSearchQuery.toLowerCase()
-    const fullName = `${user.firstName || ""} ${user.lastName || ""}`.toLowerCase()
-    return user.email.toLowerCase().includes(searchLower) || fullName.includes(searchLower)
   })
 
   // Export subscribers to CSV
@@ -182,6 +142,87 @@ export function AdminDashboardClient() {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+  }
+
+  // Export subscribers to PDF
+  const handleExportPDF = () => {
+    if (filteredSubscribers.length === 0) {
+      alert("No data to export. There are no subscribers matching your current filters.")
+      return
+    }
+
+    // Create HTML content for PDF
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Subscribers Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 40px; }
+          h1 { color: #06b6d4; margin-bottom: 10px; }
+          .meta { color: #666; margin-bottom: 30px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th { background-color: #06b6d4; color: white; padding: 12px; text-align: left; }
+          td { padding: 10px; border-bottom: 1px solid #ddd; }
+          tr:hover { background-color: #f5f5f5; }
+          .status-active { color: #22c55e; font-weight: bold; }
+          .status-inactive { color: #f97316; }
+        </style>
+      </head>
+      <body>
+        <h1>Subscribers Report</h1>
+        <div class="meta">
+          Generated on ${new Date().toLocaleString("en-US", { 
+            month: "long", 
+            day: "numeric", 
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          })}
+          <br>Total Subscribers: ${filteredSubscribers.length}
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Subscribed Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredSubscribers.map((sub, idx) => `
+              <tr>
+                <td>${idx + 1}</td>
+                <td>${sub.email}</td>
+                <td class="status-${sub.status}">${sub.status === "active" ? "✓ Active" : "○ Unsubscribed"}</td>
+                <td>${new Date(sub.subscribedAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `
+
+    // Create a new window and print
+    const printWindow = window.open("", "_blank")
+    if (printWindow) {
+      printWindow.document.write(htmlContent)
+      printWindow.document.close()
+      printWindow.focus()
+      setTimeout(() => {
+        printWindow.print()
+        printWindow.close()
+      }, 250)
+    }
   }
 
   return (
@@ -285,6 +326,15 @@ export function AdminDashboardClient() {
               >
                 <Download className="w-4 h-4 mr-2" />
                 Export CSV
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportPDF}
+                className="hover:bg-blue-500/10 hover:border-blue-400 hover:text-blue-400 transition-all duration-300"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export PDF
               </Button>
             </div>
           </div>
@@ -408,121 +458,7 @@ export function AdminDashboardClient() {
         </CardContent>
       </Card>
 
-      {/* Registered Users Section */}
-      <Card className="border-blue-500/20 bg-card/50 backdrop-blur-sm hover:border-blue-500/30 transition-all duration-300">
-        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-blue-500/5 to-purple-500/5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <UserCheck className="w-6 h-6 text-blue-400" />
-                Registered Users
-              </CardTitle>
-              <CardDescription className="mt-2">
-                Portfolio visitors who created accounts • {filteredUsers.length} users
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                <Activity className="w-3 h-3 mr-1" />
-                {registeredUsers.length} Total
-              </Badge>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-6">
-          {/* Search Bar */}
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search by name or email..."
-                value={userSearchQuery}
-                onChange={(e) => setUserSearchQuery(e.target.value)}
-                className="pl-10 bg-secondary/20 border-border/50 focus:border-blue-500 hover:border-blue-500/50 transition-all duration-300"
-              />
-            </div>
-          </div>
 
-          {/* Users Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredUsers.map((user) => (
-              <Card 
-                key={user.id} 
-                className="border-border/50 bg-secondary/20 hover:border-blue-500/50 hover:bg-secondary/30 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] transition-all duration-300 group"
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    {/* User Avatar */}
-                    <div className="relative">
-                      <img
-                        src={user.imageUrl}
-                        alt={`${user.firstName || "User"}'s avatar`}
-                        className="w-12 h-12 rounded-full border-2 border-blue-500/30 group-hover:border-blue-400 group-hover:scale-110 transition-all duration-300"
-                      />
-                      {user.emailVerified && (
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-background flex items-center justify-center">
-                          <Shield className="w-3 h-3 text-white" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* User Info */}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-foreground group-hover:text-blue-400 transition-colors truncate">
-                        {user.firstName && user.lastName 
-                          ? `${user.firstName} ${user.lastName}` 
-                          : user.firstName || user.lastName || "Anonymous User"}
-                      </h4>
-                      <p className="text-xs text-muted-foreground truncate mb-2">{user.email}</p>
-                      
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Calendar className="w-3 h-3 text-blue-400" />
-                          <span>Joined {new Date(user.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
-                        </div>
-                        {user.lastSignInAt && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <LogIn className="w-3 h-3 text-green-400" />
-                            <span>Last seen {new Date(user.lastSignInAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2 mt-3">
-                        <Badge 
-                          variant="outline" 
-                          className={user.emailVerified 
-                            ? "bg-green-500/10 text-green-400 border-green-500/30 text-xs" 
-                            : "bg-orange-500/10 text-orange-400 border-orange-500/30 text-xs"
-                          }
-                        >
-                          {user.emailVerified ? "✓ Verified" : "⚠ Unverified"}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Empty State */}
-          {filteredUsers.length === 0 && (
-            <div className="text-center py-16">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/10 border border-blue-500/20 mb-4">
-                {userSearchQuery ? <Search className="w-8 h-8 text-blue-400" /> : <UserCheck className="w-8 h-8 text-blue-400" />}
-              </div>
-              <p className="text-lg font-medium text-foreground mb-2">
-                {userSearchQuery ? "No users found" : "No registered users yet"}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {userSearchQuery ? "Try adjusting your search query" : "Users who sign up will appear here"}
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Footer Stats */}
       <div className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-secondary/20">

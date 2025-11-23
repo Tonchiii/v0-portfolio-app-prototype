@@ -89,3 +89,13 @@ export const network_alerts = pgTable("network_alerts", {
   description: text("description").notNull(),
   created_at: timestamp("created_at").defaultNow(),
 });
+
+// BLOCKED USERS TABLE
+export const blocked_users = pgTable("blocked_users", {
+  id: serial("id").primaryKey(),
+  user_id: text("user_id").notNull().unique(),
+  email: text("email").notNull(),
+  blocked_by: text("blocked_by").notNull(),
+  reason: text("reason"),
+  created_at: timestamp("created_at").defaultNow(),
+});

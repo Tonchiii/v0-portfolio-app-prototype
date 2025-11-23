@@ -55,7 +55,7 @@ export default function AskAI() {
     setOpen(true)
   }
 
-  async function send() {
+  async function send(retryCount = 0) {
     if (!isSignedIn) {
       router.push("/sign-in")
       return
@@ -70,14 +70,19 @@ export default function AskAI() {
     setLoading(true)
 
     try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 35000) // 35 second timeout
+
       const res = await fetch("/api/ask-ai", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ message: text, history: newMsgs }),
+        signal: controller.signal,
       })
 
+      clearTimeout(timeoutId)
+
       if (res.status === 401) {
-        // Not authenticated, redirect to sign-in
         router.push("/sign-in")
         setLoading(false)
         return
@@ -88,12 +93,39 @@ export default function AskAI() {
       if (json.reply) {
         setMessages((m) => [...m, { role: "assistant", text: String(json.reply) }])
       } else if (json.error) {
-        setMessages((m) => [...m, { role: "assistant", text: `Error: ${String(json.error)}` }])
+        // Show error message with retry option for specific errors
+        const errorMsg = String(json.error)
+        if ((res.status === 503 || res.status === 504 || res.status === 429) && retryCount < 2) {
+          setMessages((m) => [...m, { role: "assistant", text: `${errorMsg} Retrying...` }])
+          setTimeout(() => {
+            // Remove retry message and retry
+            setMessages((m) => m.slice(0, -1))
+            send(retryCount + 1)
+          }, 2000)
+        } else {
+          setMessages((m) => [...m, { role: "assistant", text: errorMsg }])
+        }
       } else {
-        setMessages((m) => [...m, { role: "assistant", text: "No response received." }])
+        setMessages((m) => [...m, { role: "assistant", text: "No response received. Please try again." }])
       }
-    } catch (err) {
-      setMessages((m) => [...m, { role: "assistant", text: "Network error. Please try again." }])
+    } catch (err: any) {
+      console.error("Ask AI Error:", err)
+      let errorMsg = "Network error. Please check your connection and try again."
+      
+      if (err.name === 'AbortError') {
+        errorMsg = "Request timed out. The AI is taking too long to respond. Please try again."
+      }
+      
+      // Auto-retry on network errors (up to 2 times)
+      if (retryCount < 2 && (err.name === 'AbortError' || err.message?.includes('fetch'))) {
+        setMessages((m) => [...m, { role: "assistant", text: `${errorMsg} Retrying...` }])
+        setTimeout(() => {
+          setMessages((m) => m.slice(0, -1))
+          send(retryCount + 1)
+        }, 2000)
+      } else {
+        setMessages((m) => [...m, { role: "assistant", text: errorMsg }])
+      }
     } finally {
       setLoading(false)
     }
@@ -145,10 +177,52 @@ export default function AskAI() {
           {/* Messages */}
           <div ref={listRef} className="p-4 h-96 overflow-y-auto space-y-4 text-sm bg-background/50">
             {messages.length === 0 && (
-              <div className="text-center text-muted-foreground py-8">
-                <Bot className="w-12 h-12 mx-auto mb-3 text-cyan-400/50" />
-                <p className="font-medium mb-2">Ask me anything about this portfolio!</p>
-                <p className="text-xs">Education • Skills • Projects • Experience</p>
+              <div className="space-y-4">
+                {/* Welcome Message */}
+                <div className="flex justify-start">
+                  <div className="max-w-[85%] px-4 py-3 rounded-2xl shadow-sm bg-secondary/80 backdrop-blur-sm border border-border/30">
+                    <div className="whitespace-pre-wrap break-words">
+                      Hi! 👋 I'm Elton's AI assistant. Ask me about his skills, projects, education, or career goals!
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Questions */}
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground font-medium">Quick questions:</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setInput("What are your strengths?")}
+                      className="px-3 py-2 text-xs rounded-full bg-secondary/60 hover:bg-secondary border border-border/30 hover:border-cyan-500/50 transition-all"
+                    >
+                      What are your strengths?
+                    </button>
+                    <button
+                      onClick={() => setInput("What are your weaknesses?")}
+                      className="px-3 py-2 text-xs rounded-full bg-secondary/60 hover:bg-secondary border border-border/30 hover:border-cyan-500/50 transition-all"
+                    >
+                      What are your weaknesses?
+                    </button>
+                    <button
+                      onClick={() => setInput("Show me your projects")}
+                      className="px-3 py-2 text-xs rounded-full bg-secondary/60 hover:bg-secondary border border-border/30 hover:border-cyan-500/50 transition-all"
+                    >
+                      Show me your projects
+                    </button>
+                    <button
+                      onClick={() => setInput("What are your goals?")}
+                      className="px-3 py-2 text-xs rounded-full bg-secondary/60 hover:bg-secondary border border-border/30 hover:border-cyan-500/50 transition-all"
+                    >
+                      What are your goals?
+                    </button>
+                    <button
+                      onClick={() => setInput("How can I contact you?")}
+                      className="px-3 py-2 text-xs rounded-full bg-secondary/60 hover:bg-secondary border border-border/30 hover:border-cyan-500/50 transition-all"
+                    >
+                      How can I contact you?
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
             {messages.map((m, i) => (

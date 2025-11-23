@@ -30,7 +30,18 @@ export function ExperienceSection() {
                 <CardHeader className="text-center">
                   <div className="flex flex-col items-center gap-2">
                     <div>
-                      <CardTitle className="text-2xl">{exp.title}</CardTitle>
+                      {exp.link ? (
+                        <a 
+                          href={exp.link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="hover:text-cyan-400 transition-colors duration-300 group"
+                        >
+                          <CardTitle className="text-2xl group-hover:underline">{exp.title}</CardTitle>
+                        </a>
+                      ) : (
+                        <CardTitle className="text-2xl">{exp.title}</CardTitle>
+                      )}
                       <CardDescription className="text-base mt-1">{exp.company}</CardDescription>
                     </div>
                     <Badge variant="secondary" className="w-fit">
@@ -147,6 +158,21 @@ export function ExperienceSection() {
               </Badge>
               <Badge variant="outline" className="border-purple-500/30 text-purple-400 text-base px-6 py-2 hover:bg-purple-500/20 hover:border-purple-400 hover:scale-110 hover:shadow-[0_0_20px_rgba(168,85,247,0.6)] transition-all duration-300 cursor-default">
                 Cybersecurity
+              </Badge>
+              <Badge variant="outline" className="border-green-500/30 text-green-400 text-base px-6 py-2 hover:bg-green-500/20 hover:border-green-400 hover:scale-110 hover:shadow-[0_0_20px_rgba(34,197,94,0.6)] transition-all duration-300 cursor-default">
+                Badminton
+              </Badge>
+              <Badge variant="outline" className="border-orange-500/30 text-orange-400 text-base px-6 py-2 hover:bg-orange-500/20 hover:border-orange-400 hover:scale-110 hover:shadow-[0_0_20px_rgba(249,115,22,0.6)] transition-all duration-300 cursor-default">
+                Driving & Automotive
+              </Badge>
+              <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 text-base px-6 py-2 hover:bg-emerald-500/20 hover:border-emerald-400 hover:scale-110 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)] transition-all duration-300 cursor-default">
+                Nature Exploration
+              </Badge>
+              <Badge variant="outline" className="border-pink-500/30 text-pink-400 text-base px-6 py-2 hover:bg-pink-500/20 hover:border-pink-400 hover:scale-110 hover:shadow-[0_0_20px_rgba(236,72,153,0.6)] transition-all duration-300 cursor-default">
+                Social Activities
+              </Badge>
+              <Badge variant="outline" className="border-indigo-500/30 text-indigo-400 text-base px-6 py-2 hover:bg-indigo-500/20 hover:border-indigo-400 hover:scale-110 hover:shadow-[0_0_20px_rgba(99,102,241,0.6)] transition-all duration-300 cursor-default">
+                Gaming
               </Badge>
             </div>
           </div>

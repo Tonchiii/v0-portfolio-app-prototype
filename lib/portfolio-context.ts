@@ -55,6 +55,27 @@ export function getPortfolioContext(): PortfolioContext {
     phone: "09919043753",
     linkedin: "https://www.linkedin.com/in/elton-james-ramos",
     about: "Detail-oriented IT student with experience in software development and cyber security. Skilled in PHP/Laravel, Python, and database management. Seeking to apply my technical skills in an innovative role to contribute to efficient system solutions.",
+    strengths: [
+      "Strong technical skills in PHP/Laravel, Python, and database management",
+      "Detail-oriented with excellent problem-solving abilities",
+      "Quick learner who adapts to new technologies",
+      "Experience in cybersecurity and secure coding practices",
+      "Proficient in both frontend and backend development",
+      "Strong understanding of OWASP security principles"
+    ],
+    weaknesses: [
+      "Public speaking - actively working to improve through presentations",
+      "Time management when juggling multiple projects - learning prioritization techniques",
+      "Limited international work experience - eager to gain global perspective"
+    ],
+    goals: [
+      "Secure a software developer or cybersecurity role in an innovative company",
+      "Contribute to meaningful projects that improve system efficiency and security",
+      "Continuously expand technical skills in emerging technologies",
+      "Earn advanced certifications in cybersecurity (CEH, CISSP)",
+      "Build expertise in cloud technologies (AWS, Azure)",
+      "Eventually lead development teams and mentor junior developers"
+    ]
   }
 
   // Education and certifications from experiences array
@@ -95,6 +116,15 @@ export function getPortfolioContext(): PortfolioContext {
         issuer: exp.company,
         date: exp.period,
         id: certIdMatch ? certIdMatch[1] : undefined,
+        skills: exp.technologies,
+      })
+    } else if (exp.title.toLowerCase().includes("capstone") || exp.company.toLowerCase().includes("capstone")) {
+      // Capstone projects are educational achievements
+      education.push({
+        title: exp.title,
+        institution: exp.company,
+        period: exp.period,
+        description: exp.description,
         skills: exp.technologies,
       })
     }
@@ -143,7 +173,14 @@ export function getPortfolioContext(): PortfolioContext {
 export function buildPortfolioPrompt(): string {
   const context = getPortfolioContext()
 
-  return `You are an AI assistant for ${context.personal.name}'s portfolio website. You can only answer questions about information in this portfolio. If asked about something not in the portfolio, politely say you don't have that information.
+  return `You are an AI assistant specifically built to answer questions about ${context.personal.name} (Elton James Ramos) and his portfolio ONLY. 
+
+STRICT RULES:
+- You can ONLY answer questions about Elton James Ramos, his education, skills, projects, certifications, experience, and contact information
+- If the question is NOT related to Elton James Ramos or this portfolio, respond: "I'm specifically built to answer questions about Elton James Ramos and his portfolio only. Please ask me about his education, skills, projects, certifications, or experience."
+- DO NOT answer general questions, math problems, current events, or anything unrelated to this portfolio
+- DO NOT provide information about other people, topics, or general knowledge
+- Stay focused on Elton James Ramos only
 
 PORTFOLIO INFORMATION:
 
@@ -155,6 +192,15 @@ PORTFOLIO INFORMATION:
 - Phone: ${context.personal.phone}
 - LinkedIn: ${context.personal.linkedin}
 - About: ${context.personal.about}
+
+## Strengths
+${context.personal.strengths.map(s => `- ${s}`).join('\n')}
+
+## Areas for Growth (Weaknesses)
+${context.personal.weaknesses.map(w => `- ${w}`).join('\n')}
+
+## Career Goals
+${context.personal.goals.map(g => `- ${g}`).join('\n')}
 
 ## Education
 ${context.education.map((edu) => `- ${edu.title} at ${edu.institution} (${edu.period})\n  ${edu.description}\n  Skills: ${edu.skills.join(", ")}`).join("\n")}
@@ -171,10 +217,18 @@ ${context.projects.map((proj) => `- ${proj.title}\n  ${proj.description}\n  Tech
 ## Blog Posts
 ${context.blog.map((post) => `- ${post.title} (${post.category})\n  ${post.excerpt}`).join("\n")}
 
-INSTRUCTIONS:
-- Only answer based on the portfolio information above
-- Be concise and helpful
-- If asked about something not in the portfolio, say you don't have that information
-- Keep responses under 200 words
-- Be professional and friendly`
+YOUR RESPONSE GUIDELINES:
+- ONLY answer questions about Elton James Ramos based on the portfolio information above
+- Be concise and helpful (under 200 words)
+- Be professional and friendly
+- If the question is about anything else (weather, math, news, other people, general topics, etc.), immediately respond with: "I'm specifically built to answer questions about Elton James Ramos and his portfolio only. Please ask me about his education, skills, projects, certifications, or experience."
+- Examples of valid questions: "What are Elton's skills?", "Tell me about his education", "What projects has he worked on?", "What certifications does he have?"
+- Examples of INVALID questions you must reject: "What's the weather?", "Solve this math problem", "Tell me about Python", "Who is the president?", "Write me a poem"
+
+COMMON QUESTIONS & HOW TO ANSWER:
+1. "What are your strengths?" - Highlight key technical skills (PHP/Laravel, Python, cybersecurity), attention to detail, problem-solving, and ability to learn quickly
+2. "What are your weaknesses?" - Mention areas for growth like public speaking, delegation, or expanding international work experience, but frame positively
+3. "Show me your projects" - List and describe the projects from the portfolio above with their technologies
+4. "What are your goals?" - Discuss career goals in software development, cybersecurity, contributing to innovative solutions, continuous learning
+5. "How can I contact you?" - Provide email (${getPortfolioContext().personal.email}), phone (${getPortfolioContext().personal.phone}), and LinkedIn`
 }

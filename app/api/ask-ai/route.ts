@@ -75,14 +75,33 @@ export async function POST(req: Request) {
       content: userMessage,
     })
 
-    // Call Groq API with updated model
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile", // Using Llama 3.3 70B (latest)
-      messages: messages,
-      temperature: 0.7,
-      max_tokens: 500,
-      top_p: 0.9,
-    })
+    // Call Groq API with updated model and timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+
+    try {
+      const completion = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile", // Using Llama 3.3 70B (latest)
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 500,
+        top_p: 0.9,
+      })
+      clearTimeout(timeoutId)
+
+      const reply = completion.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response."
+      return NextResponse.json({ reply })
+    } catch (apiError: any) {
+      clearTimeout(timeoutId)
+      
+      if (apiError.name === 'AbortError') {
+        return NextResponse.json(
+          { error: "Request timeout. The AI service is taking too long. Please try again." },
+          { status: 504 }
+        )
+      }
+      throw apiError
+    }
 
     const reply = completion.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response."
 
@@ -106,13 +125,20 @@ export async function POST(req: Request) {
 
     if (error?.status === 429) {
       return NextResponse.json(
-        { error: "Rate limit exceeded. Please try again later." },
+        { error: "Rate limit exceeded. Please try again in a few seconds." },
         { status: 429 }
       )
     }
 
+    if (error?.code === 'ENOTFOUND' || error?.code === 'ECONNREFUSED' || error?.code === 'ETIMEDOUT') {
+      return NextResponse.json(
+        { error: "Unable to connect to AI service. Please check your internet connection and try again." },
+        { status: 503 }
+      )
+    }
+
     return NextResponse.json(
-      { error: `Failed to get AI response: ${error?.message || "Unknown error"}` },
+      { error: error?.message || "AI service temporarily unavailable. Please try again." },
       { status: 500 }
     )
   }
