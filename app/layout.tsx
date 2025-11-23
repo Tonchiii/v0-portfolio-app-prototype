@@ -13,6 +13,12 @@ export const metadata: Metadata = {
   description:
     "Expert cybersecurity specialist portfolio showcasing experience in threat detection, incident response, and security architecture",
   generator: "v0.app",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
 }
 
 export default function RootLayout({
