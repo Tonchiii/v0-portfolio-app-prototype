@@ -24,15 +24,6 @@ export const experiences: Experience[] = [
     technologies: ["Laravel", "PHP", "Python", "Database Management", "Software Development", "Cyber Security"],
   },
   {
-    title: "HTML & CSS Certification (Information Technology Specialist)",
-    company: "Certiport / Pearson VUE",
-    period: "November 6, 2025",
-    description:
-      "Passed the HTML and CSS certification (Information Technology Specialist). Certificate awarded November 6, 2025. Certificate ID: c69Y-uSrs.",
-    technologies: ["HTML", "CSS", "Responsive Design", "Flexbox", "Grid"],
-    image: "/certificates/html-css-cert.png",
-  },
-  {
     title: "Dental Clinic Appointment Management System with Decision Support",
     company: "St. Paul University Philippines - Capstone Project",
     period: "2024-2025",
@@ -74,12 +65,21 @@ export const experiences: Experience[] = [
     technologies: ["Vulnerability Assessment", "Defensive Security", "Hacking Techniques", "Security Tools"],
   },
   {
-    title: "Rich Media Film Showing - 1st Runner Up",
+    title: "Rich Media Film Showing - Top 4",
     company: "St. Paul University Philippines",
     period: "2024",
     description:
-      "Achieved 1st Runner Up in Rich Media Film Showing competition, demonstrating creativity and technical skills in multimedia production.",
+      "Achieved Top 4 in Rich Media Film Showing competition, demonstrating creativity and technical skills in multimedia production.",
     technologies: ["Video Production", "Multimedia", "Storytelling", "Creative Design"],
+  },
+  {
+    title: "HTML & CSS Certification (Information Technology Specialist)",
+    company: "Certiport / Pearson VUE",
+    period: "November 6, 2025",
+    description:
+      "Passed the HTML and CSS certification (Information Technology Specialist). Certificate awarded November 6, 2025. Certificate ID: c69Y-uSrs.",
+    technologies: ["HTML", "CSS", "Responsive Design", "Flexbox", "Grid"],
+    image: "/certificates/html-css-cert.png",
   },
 ]
 

@@ -321,15 +321,6 @@ export function AdminDashboardClient() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleExportCSV}
-                className="hover:bg-cyan-500/10 hover:border-cyan-400 hover:text-cyan-400 transition-all duration-300"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export CSV
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
                 onClick={handleExportPDF}
                 className="hover:bg-blue-500/10 hover:border-blue-400 hover:text-blue-400 transition-all duration-300"
               >
@@ -368,14 +359,6 @@ export function AdminDashboardClient() {
                 className={filterStatus === "active" ? "bg-green-600 hover:bg-green-700" : "hover:bg-green-500/10"}
               >
                 Active ({activeSubscribers})
-              </Button>
-              <Button
-                variant={filterStatus === "unsubscribed" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilterStatus("unsubscribed")}
-                className={filterStatus === "unsubscribed" ? "bg-orange-600 hover:bg-orange-700" : "hover:bg-orange-500/10"}
-              >
-                Unsubscribed ({subscribers.length - activeSubscribers})
               </Button>
             </div>
           </div>

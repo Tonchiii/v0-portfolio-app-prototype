@@ -53,6 +53,12 @@ export default function SecurityCenterPage() {
   const [showPhoneInput, setShowPhoneInput] = useState(false)
   const [userRole, setUserRole] = useState<string | null>(null)
   const [isCheckingRole, setIsCheckingRole] = useState(true)
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [passwordError, setPasswordError] = useState("")
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
 
   useEffect(() => {
     const checkUserRole = async () => {
@@ -118,8 +124,20 @@ export default function SecurityCenterPage() {
       localStorage.setItem('userSessions', JSON.stringify(initialSessions))
     }
 
-    // Check if user has MFA enabled
-    setMfaEnabled(user?.twoFactorEnabled || false)
+    // Fetch 2FA status from API
+    const fetch2FAStatus = async () => {
+      try {
+        const response = await fetch('/api/security/2fa')
+        if (response.ok) {
+          const data = await response.json()
+          setMfaEnabled(data.mfaEnabled)
+        }
+      } catch (error) {
+        console.error('Error fetching 2FA status:', error)
+      }
+    }
+
+    fetch2FAStatus()
     
     // Load phone number from localStorage
     const storedPhone = localStorage.getItem('userPhoneNumber')
@@ -204,9 +222,25 @@ export default function SecurityCenterPage() {
     localStorage.setItem('userSessions', JSON.stringify(updatedSessions))
   }
 
-  const handleEnableMFA = () => {
-    // In production, integrate with Clerk's 2FA API
-    setMfaEnabled(true)
+  const handleToggleMFA = async (enable: boolean) => {
+    try {
+      const response = await fetch('/api/security/2fa', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ enabled: enable }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setMfaEnabled(data.mfaEnabled)
+      } else {
+        console.error('Failed to update 2FA status')
+      }
+    } catch (error) {
+      console.error('Error toggling 2FA:', error)
+    }
   }
 
   const handleAddPhone = () => {
@@ -223,25 +257,72 @@ export default function SecurityCenterPage() {
     localStorage.removeItem('userPhoneNumber')
   }
 
+  const handleChangePassword = async () => {
+    setPasswordError("")
+    setPasswordSuccess(false)
+
+    if (!newPassword || !confirmPassword) {
+      setPasswordError("Please fill in all fields")
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match")
+      return
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordError("Password must be at least 8 characters long")
+      return
+    }
+
+    try {
+      // Use Clerk's updatePassword method
+      await user?.updatePassword({
+        newPassword: newPassword,
+        signOutOfOtherSessions: true,
+      })
+      
+      setPasswordSuccess(true)
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+      
+      setTimeout(() => {
+        setShowPasswordDialog(false)
+        setPasswordSuccess(false)
+      }, 2000)
+    } catch (error: any) {
+      console.error("Error changing password:", error)
+      setPasswordError(error?.errors?.[0]?.message || "Failed to change password")
+    }
+  }
+
   const handleConnectOAuth = async (provider: "oauth_google" | "oauth_github") => {
     try {
-      // Use Clerk's OAuth connection
+      const redirect = `${window.location.origin}/security`
       await user?.createExternalAccount({
         strategy: provider,
-        redirectUrl: window.location.href,
+        redirectUrl: redirect,
+        redirect_url: redirect,
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error connecting ${provider}:`, error)
+      alert(error?.errors?.[0]?.message || `Failed to connect ${provider}`)
     }
   }
 
   const handleDisconnectOAuth = async (externalAccountId: string) => {
     try {
-      await user?.externalAccounts.find(acc => acc.id === externalAccountId)?.destroy()
-      // Reload user data
-      await user?.reload()
-    } catch (error) {
+      const account = user?.externalAccounts?.find(acc => acc.id === externalAccountId)
+      if (account) {
+        await account.destroy()
+        // Reload user data to reflect changes
+        await user?.reload()
+      }
+    } catch (error: any) {
       console.error("Error disconnecting account:", error)
+      alert(error?.errors?.[0]?.message || "Failed to disconnect account")
     }
   }
 
@@ -400,10 +481,83 @@ export default function SecurityCenterPage() {
                   <p className="font-medium">Password</p>
                   <p className="text-sm text-muted-foreground">Last changed: {new Date().toLocaleDateString()}</p>
                 </div>
-                <Button variant="outline" size="sm" className="hover:bg-cyan-500/10 hover:border-cyan-400 transition-all duration-300">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="hover:bg-cyan-500/10 hover:border-cyan-400 transition-all duration-300"
+                  onClick={() => setShowPasswordDialog(true)}
+                >
                   Change Password
                 </Button>
               </div>
+
+              {showPasswordDialog && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                  <Card className="w-full max-w-md border-cyan-500/30 bg-card shadow-2xl">
+                    <CardHeader>
+                      <CardTitle className="text-2xl">Change Password</CardTitle>
+                      <CardDescription>Enter your new password below</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {passwordError && (
+                        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                          {passwordError}
+                        </div>
+                      )}
+                      {passwordSuccess && (
+                        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4" />
+                          Password changed successfully!
+                        </div>
+                      )}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">New Password</label>
+                        <input
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Enter new password"
+                          className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:border-cyan-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Confirm New Password</label>
+                        <input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Confirm new password"
+                          className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground focus:outline-none focus:border-cyan-400"
+                        />
+                      </div>
+                      <div className="flex gap-2 pt-4">
+                        <Button
+                          variant="default"
+                          className="flex-1 bg-cyan-600 hover:bg-cyan-700"
+                          onClick={handleChangePassword}
+                          disabled={passwordSuccess}
+                        >
+                          Change Password
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => {
+                            setShowPasswordDialog(false)
+                            setPasswordError("")
+                            setPasswordSuccess(false)
+                            setCurrentPassword("")
+                            setNewPassword("")
+                            setConfirmPassword("")
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
 
               <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-secondary/20 hover:border-cyan-500/50 transition-all duration-300">
                 <div className="space-y-1">
@@ -427,17 +581,29 @@ export default function SecurityCenterPage() {
                       : "Add an extra layer of security to your account"}
                   </p>
                 </div>
-                <Button 
-                  variant={mfaEnabled ? "outline" : "default"}
-                  size="sm" 
-                  className={mfaEnabled 
-                    ? "hover:bg-cyan-500/10 hover:border-cyan-400" 
-                    : "bg-cyan-600 hover:bg-cyan-700 hover:shadow-[0_0_20px_rgba(6,182,212,0.5)]"
-                  }
-                  onClick={handleEnableMFA}
-                >
-                  {mfaEnabled ? "Manage 2FA" : "Enable 2FA"}
-                </Button>
+                <div className="flex gap-2">
+                  {mfaEnabled ? (
+                    <Button 
+                      variant="outline"
+                      size="sm" 
+                      className="hover:bg-red-500/10 hover:border-red-400 hover:text-red-400 transition-all duration-300"
+                      onClick={() => handleToggleMFA(false)}
+                    >
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Disable 2FA
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="default"
+                      size="sm" 
+                      className="bg-cyan-600 hover:bg-cyan-700 hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] transition-all duration-300"
+                      onClick={() => handleToggleMFA(true)}
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Enable 2FA
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -19,7 +19,7 @@ export function BlogSection() {
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-balance">Latest Development Insights</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-              Deep dives into modern development tools, platforms, and security technologies
+              Tools used making this portfolio and insights into modern development platforms and security technologies
             </p>
           </div>
 
