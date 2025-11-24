@@ -32,17 +32,11 @@ export function Navigation() {
             <Link href="/#newsletter" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
               Newsletter
             </Link>
-            {isSignedIn && (
-              <Link href="/security" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] flex items-center gap-1">
-                <Shield className="w-3.5 h-3.5" />
-                Security Center
-              </Link>
-            )}
             <ThemeSwitcher />
             {isSignedIn ? (
               <div className="flex items-center gap-3">
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="/admin">Dashboard</Link>
+                  <Link href="/admin">Security Center</Link>
                 </Button>
                 <UserButton 
                   appearance={{
@@ -90,23 +84,13 @@ export function Navigation() {
             >
               Newsletter
             </Link>
-            {isSignedIn && (
-              <Link
-                href="/security"
-                className="block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2 flex items-center gap-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Shield className="w-3.5 h-3.5" />
-                Security Center
-              </Link>
-            )}
             <div className="flex justify-center py-2">
               <ThemeSwitcher />
             </div>
             {isSignedIn ? (
               <div className="space-y-3">
                 <Button variant="outline" size="sm" className="w-full bg-transparent" asChild>
-                  <Link href="/admin">Dashboard</Link>
+                  <Link href="/admin">Security Center</Link>
                 </Button>
                 <div className="flex items-center justify-center pt-2">
                   <UserButton 

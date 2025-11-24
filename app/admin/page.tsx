@@ -38,9 +38,9 @@ export default async function AdminDashboard() {
                     </div>
                     <div>
                       <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                        Admin Dashboard
+                        Security Center
                       </h1>
-                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">Portfolio of Elton James Ramos</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">Admin Dashboard & Security Management</p>
                     </div>
                   </div>
                 </div>
@@ -50,7 +50,7 @@ export default async function AdminDashboard() {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <Link href="/#experience">
               <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-cyan-500/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all duration-300 cursor-pointer group h-full">
                 <CardContent className="p-6">
@@ -60,19 +60,6 @@ export default async function AdminDashboard() {
                       <p className="text-lg font-semibold group-hover:text-cyan-400 transition-colors">Portfolio</p>
                     </div>
                     <ExternalLink className="w-5 h-5 text-cyan-400 group-hover:scale-110 transition-transform" />
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link href="/security">
-              <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] transition-all duration-300 cursor-pointer group h-full">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Manage</p>
-                      <p className="text-lg font-semibold group-hover:text-blue-400 transition-colors">Security</p>
-                    </div>
-                    <Shield className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
                   </div>
                 </CardContent>
               </Card>
