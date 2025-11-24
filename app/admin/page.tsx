@@ -7,10 +7,36 @@ import { AdminHeader } from "@/components/admin-header"
 import AdminDashboardClient from "@/components/admin-dashboard-client"
 import { SecurityAdminDashboard } from "@/components/security-admin-dashboard"
 import Link from "next/link"
+import { currentUser } from "@clerk/nextjs/server"
+import { db } from "@/lib/db"
+import { admin_users } from "@/lib/schema"
+import { eq } from "drizzle-orm"
 
 export default async function AdminDashboard() {
   const subscribers = await getSubscribers()
   const activeSubscribers = subscribers.filter((sub) => sub.status === "active")
+  
+  // Check user role
+  const user = await currentUser()
+  let userRole = 'user'
+  
+  if (user?.primaryEmailAddress?.emailAddress) {
+    try {
+      const [dbUser] = await db
+        .select()
+        .from(admin_users)
+        .where(eq(admin_users.email, user.primaryEmailAddress.emailAddress))
+        .limit(1)
+      
+      if (dbUser) {
+        userRole = dbUser.role
+      }
+    } catch (error) {
+      console.error('Error checking user role:', error)
+    }
+  }
+  
+  const isAdmin = userRole === 'admin'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/10">
@@ -163,8 +189,29 @@ export default async function AdminDashboard() {
             </CardContent>
           </Card>
 
-          {/* Comprehensive Security Admin Dashboard */}
-          <SecurityAdminDashboard />
+          {/* Comprehensive Security Admin Dashboard - Admin Only */}
+          {isAdmin ? (
+            <SecurityAdminDashboard />
+          ) : (
+            <Card className="border-orange-500/20 bg-card/50 backdrop-blur-sm">
+              <CardHeader className="text-center">
+                <div className="mx-auto w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center mb-4">
+                  <Shield className="w-8 h-8 text-orange-400" />
+                </div>
+                <CardTitle className="text-2xl">Admin Access Required</CardTitle>
+                <CardDescription className="mt-2">
+                  You need administrator privileges to access security management features.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-center">
+                <div className="p-4 rounded-lg bg-orange-500/5 border border-orange-500/20 max-w-md mx-auto">
+                  <p className="text-sm text-muted-foreground">
+                    Contact the system administrator to request admin access. Your current role: <Badge variant="outline" className="ml-1">{userRole}</Badge>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Client-driven realtime dashboard */}
           <AdminDashboardClient />
