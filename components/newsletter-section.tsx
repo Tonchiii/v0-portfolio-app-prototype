@@ -10,7 +10,10 @@ import { useState } from "react"
 import { subscribeToNewsletter } from "@/app/actions"
 
 export function NewsletterSection() {
-  const [email, setEmail] = useState("")
+  const [formData, setFormData] = useState({
+    name: "",
+    email: ""
+  })
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
   const [message, setMessage] = useState("")
 
@@ -18,22 +21,28 @@ export function NewsletterSection() {
     e.preventDefault()
     setStatus("loading")
 
-    const result = await subscribeToNewsletter(email)
+    // Pass both email and name to subscription
+    const result = await subscribeToNewsletter(formData.email, formData.name)
 
     if (result.success) {
       setStatus("success")
       setMessage(result.message)
-      setEmail("")
+      setFormData({ name: "", email: "" })
+      
+      // Reload the page after 2 seconds to reflect role changes
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
     } else {
       setStatus("error")
       setMessage(result.message)
+      
+      // Reset status after 5 seconds for errors
+      setTimeout(() => {
+        setStatus("idle")
+        setMessage("")
+      }, 5000)
     }
-
-    // Reset status after 5 seconds
-    setTimeout(() => {
-      setStatus("idle")
-      setMessage("")
-    }, 5000)
   }
 
   return (
@@ -55,29 +64,53 @@ export function NewsletterSection() {
               </CardDescription>
             </CardHeader>
             <CardContent className="relative z-10">
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-                <Input
-                  type="email"
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={status === "loading" || status === "success"}
-                  className="flex-1 bg-background/50 border-border/50 focus:border-cyan-500 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]"
-                />
+              <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-sm font-medium text-muted-foreground">
+                      Email Address *
+                    </label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                      disabled={status === "loading" || status === "success"}
+                      className="bg-background/50 border-border/50 focus:border-cyan-500 hover:border-cyan-500/50 transition-all duration-300"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="name" className="text-sm font-medium text-muted-foreground">
+                      Full Name *
+                    </label>
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Enter your name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
+                      disabled={status === "loading" || status === "success"}
+                      className="bg-background/50 border-border/50 focus:border-cyan-500 hover:border-cyan-500/50 transition-all duration-300"
+                    />
+                  </div>
+                </div>
+
                 <Button
                   type="submit"
                   disabled={status === "loading" || status === "success"}
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-300 hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:scale-105"
+                  className="w-full bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-300 hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:scale-105"
                 >
-                  {status === "loading" ? "Subscribing..." : status === "success" ? "Subscribed!" : "Subscribe"}
+                  {status === "loading" ? "Subscribing..." : status === "success" ? "Subscribed! ✓" : "Subscribe"}
                 </Button>
               </form>
 
               {/* Status messages */}
               {message && (
                 <div
-                  className={`mt-4 p-4 rounded-lg flex items-center gap-3 max-w-xl mx-auto ${
+                  className={`mt-4 p-4 rounded-lg flex items-center gap-3 max-w-2xl mx-auto ${
                     status === "success"
                       ? "bg-green-500/10 border border-green-500/20 text-green-400"
                       : "bg-red-500/10 border border-red-500/20 text-red-400"
@@ -92,8 +125,8 @@ export function NewsletterSection() {
                 </div>
               )}
 
-              <p className="text-xs text-muted-foreground text-center mt-6">
-                By subscribing, you agree to receive security updates and insights. Unsubscribe anytime.
+              <p className="text-xs text-muted-foreground text-center mt-6 max-w-2xl mx-auto">
+                By subscribing, you agree to receive security updates and insights. Unsubscribe anytime. We respect your privacy and will never share your information.
               </p>
             </CardContent>
           </Card>

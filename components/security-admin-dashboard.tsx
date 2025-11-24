@@ -17,7 +17,7 @@ interface User {
   id: string
   name: string
   email: string
-  role: "admin" | "user" | "guest"
+  role: "admin" | "user" | "subscriber"
   status: "active" | "inactive"
   lastLogin: string
   mfaEnabled: boolean
@@ -60,6 +60,13 @@ interface SecurityAdminDashboardProps {
 
 export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashboardProps) {
   const { user: clerkUser } = useUser()
+  
+  // Check admin and subscriber status immediately with server-provided role
+  const currentUserEmail = clerkUser?.primaryEmailAddress?.emailAddress
+  const isAdminUser = userRole === 'admin' || currentUserEmail === "eltonramos417@gmail.com"
+  const isSubscriberUser = userRole === 'subscriber'
+  const canViewDashboard = isAdminUser || isSubscriberUser
+  
   const [users, setUsers] = useState<User[]>([])
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
   const [vulnerabilities, setVulnerabilities] = useState<Vulnerability[]>([])
@@ -72,17 +79,14 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
   const [isLoadingUsers, setIsLoadingUsers] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
 
-  // Check if current user is admin - use server-provided role first for immediate access control
-  const currentUserEmail = clerkUser?.primaryEmailAddress?.emailAddress
+  // Get current user from loaded users list
   const currentUser = users.find(u => u.email === currentUserEmail)
-  const isAdmin = userRole === 'admin' || currentUserEmail === "eltonramos417@gmail.com" || currentUser?.role === "admin"
-
-  // Early return if not admin - prevent any rendering
-  if (!isAdmin && userRole !== 'admin' && currentUserEmail !== "eltonramos417@gmail.com") {
-    return null
-  }
+  const isAdmin = isAdminUser || currentUser?.role === "admin"
 
   useEffect(() => {
+    // Allow both admin and guest to fetch data
+    if (!canViewDashboard) return
+    
     const fetchAndProcessUsers = async () => {
       setIsLoadingUsers(true)
       
@@ -96,7 +100,7 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
             id: u.id,
             name: u.name,
             email: u.email,
-            role: u.role as "admin" | "user" | "guest",
+            role: u.role as "admin" | "user" | "subscriber",
             status: u.status,
             lastLogin: u.last_login,
             mfaEnabled: u.mfa_enabled === "true",
@@ -146,11 +150,11 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
             }
             
             // New user - determine initial role
-            let role: "admin" | "user" | "guest"
+            let role: "admin" | "user" | "subscriber"
             if (email === "eltonramos417@gmail.com") {
               role = "admin"
-            } else if (email.includes("guest") || cu.emailAddresses?.[0]?.verification?.status !== "verified") {
-              role = "guest"
+            } else if (email.includes("subscriber") || cu.emailAddresses?.[0]?.verification?.status !== "verified") {
+              role = "subscriber"
             } else {
               role = "user"
             }
@@ -436,7 +440,7 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
     
     // Set mounted after all initialization is complete
     setIsMounted(true)
-  }, [clerkUser])
+  }, [clerkUser, canViewDashboard])
 
   const handleAddUser = async () => {
     if (newUser.name && newUser.email) {
@@ -490,7 +494,7 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
     }
   }
 
-  const handleChangeRole = async (userId: string, newRole: "admin" | "user" | "guest") => {
+  const handleChangeRole = async (userId: string, newRole: "admin" | "user" | "subscriber") => {
     const updatedUsers = users.map(u => 
       u.id === userId ? { ...u, role: newRole } : u
     )
@@ -677,7 +681,7 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
     switch (role) {
       case "admin": return "bg-purple-500/20 text-purple-400 border-purple-500/30"
       case "user": return "bg-blue-500/20 text-blue-400 border-blue-500/30"
-      case "guest": return "bg-gray-500/20 text-gray-400 border-gray-500/30"
+      case "subscriber": return "bg-green-500/20 text-green-400 border-green-500/30"
       default: return "bg-gray-500/20 text-gray-400 border-gray-500/30"
     }
   }
@@ -715,8 +719,75 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
     return <div className="space-y-6"><p className="text-muted-foreground">Loading dashboard...</p></div>
   }
 
+  // Don't render anything for users who can't view the dashboard
+  if (!canViewDashboard && !isAdmin) {
+    return null
+  }
+
   return (
     <div className="space-y-6">
+      {/* Subscriber View Warning Banner */}
+      {isSubscriberUser && !isAdmin && (
+        <Card className="border-yellow-500/30 bg-yellow-500/5 backdrop-blur-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-yellow-500/20">
+                <Shield className="w-5 h-5 text-yellow-400" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-yellow-400">Subscriber View Mode</p>
+                <p className="text-sm text-muted-foreground">You can view security information but cannot make any changes or modifications.</p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  if (confirm('Are you sure you want to unsubscribe? You will lose access to the Security Center and be changed back to a regular user.')) {
+                    try {
+                      // First, unsubscribe from newsletter
+                      const unsubResponse = await fetch('/api/unsubscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: currentUserEmail })
+                      })
+                      
+                      // Then change role back to user
+                      const roleResponse = await fetch('/api/admin/manage-users', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          id: clerkUser?.id,
+                          email: currentUserEmail,
+                          name: clerkUser?.fullName || clerkUser?.firstName || 'User',
+                          role: 'user',
+                          status: 'active',
+                          last_login: new Date().toLocaleString(),
+                          mfa_enabled: 'false',
+                          login_count: '0'
+                        })
+                      })
+                      
+                      if (unsubResponse.ok && roleResponse.ok) {
+                        alert('You have been unsubscribed successfully.')
+                        window.location.href = '/'
+                      } else {
+                        alert('Failed to unsubscribe. Please try again.')
+                      }
+                    } catch (error) {
+                      console.error('Error unsubscribing:', error)
+                      alert('An error occurred. Please try again.')
+                    }
+                  }
+                }}
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+              >
+                Unsubscribe
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       {/* Security Overview Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card className="border-cyan-500/30 bg-card/50 backdrop-blur-sm hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all">
@@ -891,7 +962,7 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
                   >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
-                    <option value="guest">Guest</option>
+                    <option value="subscriber">Subscriber</option>
                   </select>
                 </div>
                 <div className="flex gap-2">
@@ -959,7 +1030,7 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
                       >
                         <option value="admin">Admin</option>
                         <option value="user">User</option>
-                        <option value="guest">Guest</option>
+                        <option value="subscriber">Subscriber</option>
                       </select>
                       <Button
                         size="sm"
@@ -975,30 +1046,19 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
                         )}
                       </Button>
                       {user.email !== "eltonramos417@gmail.com" && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => user.blocked ? handleUnblockUser(user.id, user.email) : handleBlockUser(user.id, user.email)}
-                            className={`text-xs p-2 h-9 w-9 ${user.blocked ? "text-green-400 hover:text-green-300 hover:bg-green-500/10" : "text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"}`}
-                            title={user.blocked ? "Unblock User" : "Block User"}
-                          >
-                            {user.blocked ? (
-                              <CheckCircle2 className="w-4 h-4" />
-                            ) : (
-                              <Ban className="w-4 h-4" />
-                            )}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleRemoveUser(user.id)}
-                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs p-2 h-9 w-9"
-                            title="Delete User"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => user.blocked ? handleUnblockUser(user.id, user.email) : handleBlockUser(user.id, user.email)}
+                          className={`text-xs p-2 h-9 w-9 ${user.blocked ? "text-green-400 hover:text-green-300 hover:bg-green-500/10" : "text-orange-400 hover:text-orange-300 hover:bg-orange-500/10"}`}
+                          title={user.blocked ? "Unblock User" : "Block User"}
+                        >
+                          {user.blocked ? (
+                            <CheckCircle2 className="w-4 h-4" />
+                          ) : (
+                            <Ban className="w-4 h-4" />
+                          )}
+                        </Button>
                       )}
                     </div>
                   )}
@@ -1100,10 +1160,12 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
                   <option value="patched">Patched</option>
                   <option value="mitigated">Mitigated</option>
                 </select>
-                <Button size="sm" variant="outline">
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Scan Now
-                </Button>
+                {isAdmin && (
+                  <Button size="sm" variant="outline">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Scan Now
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>
@@ -1138,7 +1200,7 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
                     {vuln.cve && <span className="text-cyan-400">{vuln.cve}</span>}
                   </div>
                 </div>
-                {vuln.status === "open" && (
+                {isAdmin && vuln.status === "open" && (
                   <Button
                     size="sm"
                     onClick={() => handlePatchVulnerability(vuln.id)}
@@ -1239,14 +1301,16 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
                       </span>
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleDismissAlert(alert.id)}
-                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
+                  {isAdmin && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDismissAlert(alert.id)}
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>

@@ -10,6 +10,7 @@ import { Users, Mail, TrendingUp, Calendar, Download, Search, Filter, Eye, BarCh
 type Subscriber = {
   id: string
   email: string
+  name?: string
   subscribedAt: string
   status: "active" | "unsubscribed"
 }
@@ -91,6 +92,7 @@ export function AdminDashboardClient() {
 
 
   const activeSubscribers = subscribers.filter((s) => s.status === "active").length
+  const unsubscribedCount = subscribers.filter((s) => s.status === "unsubscribed").length
   const growth = calcGrowthRate(subscribers)
   const thisMonth = subscribers.filter((s) => {
     const d = new Date(s.subscribedAt)
@@ -101,7 +103,20 @@ export function AdminDashboardClient() {
   // Filter subscribers based on search and status
   const filteredSubscribers = subscribers.filter((sub) => {
     const matchesSearch = sub.email.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesFilter = filterStatus === "all" || sub.status === filterStatus
+    
+    // Filter logic: 
+    // - "active" shows only active subscribers
+    // - "unsubscribed" shows only unsubscribed users
+    // - "all" shows only active subscribers (excludes unsubscribed)
+    let matchesFilter = false
+    if (filterStatus === "active") {
+      matchesFilter = sub.status === "active"
+    } else if (filterStatus === "unsubscribed") {
+      matchesFilter = sub.status === "unsubscribed"
+    } else if (filterStatus === "all") {
+      matchesFilter = sub.status === "active"
+    }
+    
     return matchesSearch && matchesFilter
   })
 
@@ -350,7 +365,7 @@ export function AdminDashboardClient() {
                 onClick={() => setFilterStatus("all")}
                 className={filterStatus === "all" ? "bg-cyan-600 hover:bg-cyan-700" : "hover:bg-cyan-500/10"}
               >
-                All ({subscribers.length})
+                All ({activeSubscribers})
               </Button>
               <Button
                 variant={filterStatus === "active" ? "default" : "outline"}
@@ -359,6 +374,14 @@ export function AdminDashboardClient() {
                 className={filterStatus === "active" ? "bg-green-600 hover:bg-green-700" : "hover:bg-green-500/10"}
               >
                 Active ({activeSubscribers})
+              </Button>
+              <Button
+                variant={filterStatus === "unsubscribed" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilterStatus("unsubscribed")}
+                className={filterStatus === "unsubscribed" ? "bg-orange-600 hover:bg-orange-700" : "hover:bg-orange-500/10"}
+              >
+                Unsubscribed ({unsubscribedCount})
               </Button>
             </div>
           </div>
@@ -370,7 +393,8 @@ export function AdminDashboardClient() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border bg-secondary/20">
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Subscriber</th>
+                    <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">{filterStatus === "unsubscribed" ? "Unsubscriber" : "Subscriber"}</th>
+                    <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Name</th>
                     <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Status</th>
                     <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">Subscribed Date</th>
                     <th className="text-left py-4 px-6 text-sm font-semibold text-foreground">ID</th>
@@ -389,9 +413,12 @@ export function AdminDashboardClient() {
                           </div>
                           <div>
                             <p className="font-medium text-foreground group-hover:text-cyan-400 transition-colors">{subscriber.email}</p>
-                            <p className="text-xs text-muted-foreground">Subscriber #{index + 1}</p>
+                            <p className="text-xs text-muted-foreground">{subscriber.status === "unsubscribed" ? "Unsubscriber" : "Subscriber"} #{index + 1}</p>
                           </div>
                         </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <p className="text-sm text-foreground">{subscriber.name || "N/A"}</p>
                       </td>
                       <td className="py-4 px-6">
                         <Badge
@@ -436,7 +463,7 @@ export function AdminDashboardClient() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-foreground text-sm truncate">{subscriber.email}</p>
-                        <p className="text-xs text-muted-foreground">Subscriber #{index + 1}</p>
+                        <p className="text-xs text-muted-foreground">{subscriber.status === "unsubscribed" ? "Unsubscriber" : "Subscriber"} #{index + 1}</p>
                       </div>
                     </div>
                     <Badge

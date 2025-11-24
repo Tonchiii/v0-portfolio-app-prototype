@@ -4,6 +4,7 @@
 export interface Subscriber {
   id: string
   email: string
+  name?: string
   // Use ISO string for persistence and JSON transport
   subscribedAt: string
   status: "active" | "unsubscribed"
@@ -119,12 +120,56 @@ export async function getSubscribers(): Promise<Subscriber[]> {
   return [...mockSubscribers]
 }
 
-export async function addSubscriber(email: string): Promise<{ success: boolean; message: string }> {
+export async function addSubscriber(email: string, name?: string): Promise<{ success: boolean; message: string }> {
   // Simulate database query delay
   await new Promise((resolve) => setTimeout(resolve, 100))
+  
   // Check if email already exists
-  const exists = mockSubscribers.some((sub) => sub.email.toLowerCase() === email.toLowerCase())
-  if (exists) {
+  const existingIndex = mockSubscribers.findIndex((sub) => sub.email.toLowerCase() === email.toLowerCase())
+  
+  if (existingIndex !== -1) {
+    const existingSubscriber = mockSubscribers[existingIndex]
+    
+    // If user unsubscribed, allow them to resubscribe
+    if (existingSubscriber.status === "unsubscribed") {
+      mockSubscribers[existingIndex] = {
+        ...existingSubscriber,
+        name: name,
+        status: "active",
+        subscribedAt: new Date().toISOString()
+      }
+      
+      // Persist to disk (best-effort)
+      try {
+        ensureDataDir()
+        fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(mockSubscribers, null, 2), "utf-8")
+      } catch (e) {
+        console.error("[v0] Failed to persist subscribers:", e)
+      }
+      
+      console.log(`[v0] Subscriber reactivated: ${email}`)
+      return { success: true, message: "Successfully resubscribed!" }
+    }
+    
+    // Already an active subscriber - update name if provided
+    if (name && name !== existingSubscriber.name) {
+      mockSubscribers[existingIndex] = {
+        ...existingSubscriber,
+        name: name
+      }
+      
+      // Persist to disk (best-effort)
+      try {
+        ensureDataDir()
+        fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(mockSubscribers, null, 2), "utf-8")
+      } catch (e) {
+        console.error("[v0] Failed to persist subscribers:", e)
+      }
+      
+      console.log(`[v0] Subscriber name updated: ${email}`)
+      return { success: true, message: "Subscriber information updated!" }
+    }
+    
     return { success: false, message: "Email already subscribed" }
   }
 
@@ -132,6 +177,7 @@ export async function addSubscriber(email: string): Promise<{ success: boolean; 
   const newSubscriber: Subscriber = {
     id: String(mockSubscribers.length + 1),
     email,
+    name: name,
     subscribedAt: new Date().toISOString(),
     status: "active",
   }

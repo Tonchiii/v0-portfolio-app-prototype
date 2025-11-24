@@ -32,13 +32,27 @@
   {
     "id": "6",
     "email": "nijjanu@gmail.com",
-    "subscribedAt": "2025-11-23T13:39:27.927Z",
-    "status": "active"
+    "subscribedAt": "2025-11-24T05:22:11.213Z",
+    "status": "active",
+    "name": "Elton James Ramos"
   },
   {
     "id": "7",
     "email": "testingsubscriber@gmail.com",
     "subscribedAt": "2025-11-23T15:56:17.520Z",
+    "status": "active"
+  },
+  {
+    "id": "8",
+    "email": "nijjan@gmail.com",
+    "subscribedAt": "2025-11-24T04:49:56.783Z",
+    "status": "active"
+  },
+  {
+    "id": "9",
+    "email": "nijjanu@gmail.co",
+    "name": "elton",
+    "subscribedAt": "2025-11-24T05:05:41.011Z",
     "status": "active"
   }
 ]
