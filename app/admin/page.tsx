@@ -191,7 +191,7 @@ export default async function AdminDashboard() {
 
           {/* Comprehensive Security Admin Dashboard - Admin Only */}
           {isAdmin ? (
-            <SecurityAdminDashboard />
+            <SecurityAdminDashboard userRole={userRole} />
           ) : (
             <Card className="border-orange-500/20 bg-card/50 backdrop-blur-sm">
               <CardHeader className="text-center">

@@ -54,7 +54,11 @@ interface NetworkAlert {
   description: string
 }
 
-export function SecurityAdminDashboard() {
+interface SecurityAdminDashboardProps {
+  userRole?: string
+}
+
+export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashboardProps) {
   const { user: clerkUser } = useUser()
   const [users, setUsers] = useState<User[]>([])
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
@@ -68,10 +72,15 @@ export function SecurityAdminDashboard() {
   const [isLoadingUsers, setIsLoadingUsers] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
 
-  // Check if current user is admin (either eltonramos417@gmail.com or has admin role in database)
+  // Check if current user is admin - use server-provided role first for immediate access control
   const currentUserEmail = clerkUser?.primaryEmailAddress?.emailAddress
   const currentUser = users.find(u => u.email === currentUserEmail)
-  const isAdmin = currentUserEmail === "eltonramos417@gmail.com" || currentUser?.role === "admin"
+  const isAdmin = userRole === 'admin' || currentUserEmail === "eltonramos417@gmail.com" || currentUser?.role === "admin"
+
+  // Early return if not admin - prevent any rendering
+  if (!isAdmin && userRole !== 'admin' && currentUserEmail !== "eltonramos417@gmail.com") {
+    return null
+  }
 
   useEffect(() => {
     const fetchAndProcessUsers = async () => {
