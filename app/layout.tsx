@@ -13,12 +13,13 @@ export const metadata: Metadata = {
   description:
     "Expert cybersecurity specialist portfolio showcasing experience in threat detection, incident response, and security architecture",
   generator: "v0.app",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
+}
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 }
 
 export default function RootLayout({
@@ -27,7 +28,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: "#06b6d4",
+        },
+      }}
+    >
       <html lang="en" suppressHydrationWarning>
         <head>
           <script

@@ -6,13 +6,9 @@ import { eq } from "drizzle-orm"
 
 // Public routes matcher - These routes are accessible without authentication
 const isPublicRoute = createRouteMatcher([
-  "/",
-  "/blog(.*)",
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/api/webhooks(.*)",
-  "/api/subscribers",
-  "/api/resume",
   "/blocked",
 ])
 

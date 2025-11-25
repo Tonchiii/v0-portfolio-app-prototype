@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
+import { db } from "@/lib/db"
+import { admin_users } from "@/lib/schema"
+import { eq } from "drizzle-orm"
 
 const DATA_DIR = path.resolve(process.cwd(), "data")
 const SUBSCRIBERS_FILE = path.join(DATA_DIR, "subscribers.json")
@@ -42,6 +45,28 @@ export async function POST(request: Request) {
 
     // Save back to file
     fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2), "utf-8")
+
+    // Update user role in admin_users table
+    try {
+      const [existingUser] = await db
+        .select()
+        .from(admin_users)
+        .where(eq(admin_users.email, email))
+        .limit(1)
+      
+      if (existingUser && existingUser.role === 'subscriber') {
+        await db
+          .update(admin_users)
+          .set({ 
+            role: 'user',
+            updated_at: new Date()
+          })
+          .where(eq(admin_users.email, email))
+      }
+    } catch (dbError) {
+      console.error("Failed to update user role:", dbError)
+      // Don't fail the unsubscribe if role update fails
+    }
 
     return NextResponse.json({
       success: true,

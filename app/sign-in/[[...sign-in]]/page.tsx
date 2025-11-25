@@ -17,16 +17,15 @@ export default function SignInPage() {
             <Shield className="w-8 h-8 text-cyan-400" />
             <span>Open Learning</span>
           </Link>
-          <h1 className="text-3xl font-bold mt-4">Admin Sign In</h1>
-          <p className="text-muted-foreground mt-2">Access the admin dashboard</p>
+          <h1 className="text-3xl font-bold mt-4">Sign in to Elton James Ramos Digital Portfolio</h1>
+          <p className="text-muted-foreground mt-2">Access the portfolio and security dashboard</p>
         </div>
 
         <div className="flex justify-center">
           <SignIn
             appearance={{
-              elements: {
-                rootBox: "mx-auto",
-                card: "bg-card/50 backdrop-blur-sm border-border/50",
+              variables: {
+                colorPrimary: "#06b6d4",
               },
             }}
             routing="path"

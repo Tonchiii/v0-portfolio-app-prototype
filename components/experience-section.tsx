@@ -6,7 +6,7 @@ import Image from "next/image"
 
 export function ExperienceSection() {
   return (
-    <section id="experience" className="py-24 bg-secondary/20">
+    <section id="experience" className="py-8 bg-secondary/20">
       <div className="w-full px-4">
         <div className="max-w-5xl mx-auto space-y-16">
           {/* Section header */}

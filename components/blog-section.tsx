@@ -8,7 +8,7 @@ import Link from "next/link"
 
 export function BlogSection() {
   return (
-    <section id="blog" className="py-24 bg-background">
+    <section id="blog" className="py-12 bg-background">
       <div className="w-full px-4">
         <div className="max-w-6xl mx-auto space-y-12">
           {/* Section header */}

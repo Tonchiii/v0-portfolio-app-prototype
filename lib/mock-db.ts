@@ -116,7 +116,21 @@ export const mockBlogPosts: BlogPost[] = [
 export async function getSubscribers(): Promise<Subscriber[]> {
   // Simulate database query delay
   await new Promise((resolve) => setTimeout(resolve, 100))
-  // Return a shallow copy
+  
+  // Always read fresh data from file to ensure latest subscribers are shown
+  try {
+    if (fs.existsSync(SUBSCRIBERS_FILE)) {
+      const raw = fs.readFileSync(SUBSCRIBERS_FILE, "utf-8")
+      const freshData = JSON.parse(raw) as Subscriber[]
+      // Update in-memory cache
+      mockSubscribers = freshData
+      return [...freshData]
+    }
+  } catch (e) {
+    console.error("[v0] Failed to read subscribers file:", e)
+  }
+  
+  // Fallback to in-memory data
   return [...mockSubscribers]
 }
 

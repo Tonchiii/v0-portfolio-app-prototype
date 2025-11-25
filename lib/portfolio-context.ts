@@ -49,12 +49,17 @@ export function getPortfolioContext(): PortfolioContext {
   // Personal information
   const personal = {
     name: "Elton James T. Ramos",
-    title: "IT Student & Software Developer",
-    location: "Calocan City, Manila, Philippines",
+    title: "BSIT Student Major in Web Development & Software Developer",
+    location: "Santa Filomena, Abulug, Cagayan, Philippines",
     email: "eltonramos417@gmail.com",
     phone: "09919043753",
     linkedin: "https://www.linkedin.com/in/elton-james-ramos",
-    about: "Detail-oriented IT student with experience in software development and cyber security. Skilled in PHP/Laravel, Python, and database management. Seeking to apply my technical skills in an innovative role to contribute to efficient system solutions.",
+    age: "22 years old",
+    birthday: "May 18, 2003",
+    relationshipStatus: "Single",
+    yearLevel: "4th Year BSIT Student Major in Web Development",
+    university: "St. Paul University Philippines",
+    about: "22-year-old 4th year BSIT student major in Web Development at St. Paul University Philippines from Santa Filomena, Abulug, Cagayan with experience in software development and cyber security. Skilled in PHP/Laravel, Python, and database management. Seeking to apply my technical skills in an innovative role to contribute to efficient system solutions.",
     strengths: [
       "Strong technical skills in PHP/Laravel, Python, and database management",
       "Detail-oriented with excellent problem-solving abilities",
@@ -187,6 +192,11 @@ PORTFOLIO INFORMATION:
 ## Personal Info
 - Name: ${context.personal.name}
 - Title: ${context.personal.title}
+- Age: ${context.personal.age}
+- Birthday: ${context.personal.birthday}
+- Relationship Status: ${context.personal.relationshipStatus}
+- Education: ${context.personal.yearLevel}
+- University: ${context.personal.university}
 - Location: ${context.personal.location}
 - Email: ${context.personal.email}
 - Phone: ${context.personal.phone}

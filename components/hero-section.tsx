@@ -11,7 +11,7 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-8">
       {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-secondary/20" />
 
@@ -23,7 +23,7 @@ export function HeroSection() {
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-12">
             <div className="relative">
-              <div className="w-72 h-72 rounded-full overflow-hidden border-4 border-cyan-500/50 shadow-2xl shadow-cyan-500/40 bg-secondary/50 hover:border-cyan-400 hover:shadow-[0_0_80px_rgba(6,182,212,0.8)] hover:scale-105 transition-all duration-300 cursor-pointer">
+              <div className="profile-float w-72 h-72 rounded-full overflow-hidden border-4 border-cyan-500/50 shadow-2xl shadow-cyan-500/40 bg-secondary/50 hover:border-cyan-400 hover:scale-105 transition-all duration-300 cursor-pointer">
                 <Image
                   src="/profile-photo-full.jpg"
                   alt="Elton James T. Ramos"
@@ -78,9 +78,7 @@ export function HeroSection() {
           </h2>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto text-pretty leading-relaxed text-center">
-            HTML and CSS Specialist and Detail-oriented IT student with experience in software development and cyber security. Skilled in
-            PHP/Laravel, Python, HTML&CSS and database management. Seeking to apply my technical skills in an innovative role to
-            contribute to efficient system solutions.
+            Detail-oriented IT student with hands-on experience in software development and cybersecurity. Skilled in PHP/Laravel, Python, HTML/CSS, and database management. Passionate about building efficient, secure, and user-focused system solutions.
           </p>
 
           {/* CTA buttons */}

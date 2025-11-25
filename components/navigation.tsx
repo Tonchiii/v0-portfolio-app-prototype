@@ -57,12 +57,14 @@ export function Navigation() {
             <Link href="/#blog" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
               Blog
             </Link>
-            <Link href="/#newsletter" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
-              Newsletter
-            </Link>
-            <ThemeSwitcher />
+            {!isAdmin && (
+              <Link href="/#newsletter" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
+                Subscribe
+              </Link>
+            )}
             {isSignedIn ? (
               <div className="flex items-center gap-3">
+                <ThemeSwitcher />
                 <div className="relative">
                   <Button 
                     variant="outline" 
@@ -102,9 +104,12 @@ export function Navigation() {
                 />
               </div>
             ) : (
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/sign-in">Sign In</Link>
-              </Button>
+              <>
+                <ThemeSwitcher />
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/sign-in">Sign In</Link>
+                </Button>
+              </>
             )}
           </div>
 
@@ -131,16 +136,15 @@ export function Navigation() {
             >
               Blog
             </Link>
-            <Link
-              href="/#newsletter"
-              className="block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Newsletter
-            </Link>
-            <div className="flex justify-center py-2">
-              <ThemeSwitcher />
-            </div>
+            {!isAdmin && (
+              <Link
+                href="/#newsletter"
+                className="block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Subscribe
+              </Link>
+            )}
             {isSignedIn ? (
               <div className="space-y-3">
                 <div className="relative">
@@ -172,7 +176,8 @@ export function Navigation() {
                     </div>
                   )}
                 </div>
-                <div className="flex items-center justify-center pt-2">
+                <div className="flex items-center justify-center gap-3 pt-2">
+                  <ThemeSwitcher />
                   <UserButton 
                     appearance={{
                       elements: {
@@ -184,9 +189,14 @@ export function Navigation() {
                 </div>
               </div>
             ) : (
-              <Button variant="outline" size="sm" className="w-full bg-transparent" asChild>
-                <Link href="/sign-in">Sign In</Link>
-              </Button>
+              <div className="space-y-3">
+                <div className="flex justify-center">
+                  <ThemeSwitcher />
+                </div>
+                <Button variant="outline" size="sm" className="w-full bg-transparent" asChild>
+                  <Link href="/sign-in">Sign In</Link>
+                </Button>
+              </div>
             )}
           </div>
         )}
