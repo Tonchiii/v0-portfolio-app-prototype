@@ -61,12 +61,20 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Badge */}
-          <div className="flex justify-center">
+          {/* Badges */}
+          <div className="flex flex-wrap justify-center gap-3">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border backdrop-blur-sm">
               <Shield className="w-4 h-4 text-cyan-400" />
               <span className="text-sm font-medium text-foreground">IT Professional</span>
             </div>
+            <Link href="/portfolio-security" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 backdrop-blur-sm hover:bg-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+              <Shield className="w-4 h-4 text-cyan-400" />
+              <span className="text-sm font-medium text-cyan-400">AI Protector Graduate</span>
+            </Link>
+            <Link href="/mcp-integration" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/30 backdrop-blur-sm hover:bg-green-500/20 hover:border-green-500/50 transition-all duration-300 hover:shadow-[0_0_20px_rgba(34,197,94,0.4)]">
+              <Shield className="w-4 h-4 text-green-400" />
+              <span className="text-sm font-medium text-green-400">OAuth MCP Certified</span>
+            </Link>
           </div>
 
           {/* Main heading */}
@@ -84,7 +92,10 @@ export function HeroSection() {
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Button size="lg" className="text-lg px-8 bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(6,182,212,0.7)] hover:scale-105" asChild>
-              <Link href="#experience">View Experience</Link>
+              <Link href="/portfolio-security">
+                <Shield className="w-5 h-5 mr-2" />
+                Security Portfolio
+              </Link>
             </Button>
             <Button
               size="lg"
@@ -96,7 +107,7 @@ export function HeroSection() {
               View Resume
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent hover:bg-cyan-500/10 hover:border-cyan-400 transition-all duration-300 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:scale-105" asChild>
-              <Link href="#blog">Read Blog</Link>
+              <Link href="/mcp-integration">MCP Demo</Link>
             </Button>
           </div>
 

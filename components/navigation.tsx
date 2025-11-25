@@ -31,7 +31,7 @@ export function Navigation() {
     }
   }, [isSignedIn, user])
 
-  const handleSecurityCenterClick = (e: React.MouseEvent) => {
+  const handleAdminDashboardClick = (e: React.MouseEvent) => {
     if (!canAccessSecurityCenter) {
       e.preventDefault()
       setShowAdminMessage(true)
@@ -51,11 +51,17 @@ export function Navigation() {
 
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/#experience" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
-              Experience
+            <Link href="/" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
+              Homepage
             </Link>
-            <Link href="/#blog" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
-              Blog
+            <Link href="/portfolio-security" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
+              Security Portfolio
+            </Link>
+            <Link href="/mcp-integration" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
+              MCP Demo
+            </Link>
+            <Link href="/security-plan" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
+              Security Plan
             </Link>
             {!isAdmin && (
               <Link href="/#newsletter" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
@@ -70,18 +76,18 @@ export function Navigation() {
                     variant="outline" 
                     size="sm" 
                     asChild={canAccessSecurityCenter}
-                    onClick={handleSecurityCenterClick}
+                    onClick={handleAdminDashboardClick}
                     className={!canAccessSecurityCenter ? "cursor-not-allowed opacity-70" : ""}
                   >
                     {canAccessSecurityCenter ? (
                       <Link href="/admin">
                         {isSubscriber && <Lock className="w-3 h-3 mr-1 inline" />}
-                        Security Center
+                        Admin Dashboard
                       </Link>
                     ) : (
                       <span className="flex items-center gap-1">
                         <Lock className="w-3 h-3" />
-                        Security Center
+                        Admin Dashboard
                       </span>
                     )}
                   </Button>
@@ -123,18 +129,32 @@ export function Navigation() {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 space-y-4 border-t border-border">
             <Link
-              href="/#experience"
+              href="/"
               className="block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Experience
+              Homepage
             </Link>
             <Link
-              href="/#blog"
+              href="/portfolio-security"
               className="block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Blog
+              Security Portfolio
+            </Link>
+            <Link
+              href="/mcp-integration"
+              className="block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              MCP Demo
+            </Link>
+            <Link
+              href="/security-plan"
+              className="block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Security Plan
             </Link>
             {!isAdmin && (
               <Link
@@ -153,17 +173,17 @@ export function Navigation() {
                     size="sm" 
                     className={`w-full bg-transparent ${!canAccessSecurityCenter ? "cursor-not-allowed opacity-70" : ""}`}
                     asChild={canAccessSecurityCenter}
-                    onClick={handleSecurityCenterClick}
+                    onClick={handleAdminDashboardClick}
                   >
                     {canAccessSecurityCenter ? (
                       <Link href="/admin" className="flex items-center justify-center gap-1">
                         {isSubscriber && <Lock className="w-3 h-3" />}
-                        Security Center
+                        Admin Dashboard
                       </Link>
                     ) : (
                       <span className="flex items-center justify-center gap-1">
                         <Lock className="w-3 h-3" />
-                        Security Center
+                        Admin Dashboard
                       </span>
                     )}
                   </Button>
