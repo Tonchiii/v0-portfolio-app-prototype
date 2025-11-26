@@ -6,12 +6,14 @@ import { Shield, Menu, X, Lock } from "lucide-react"
 import { useState, useEffect } from "react"
 import { UserButton, useUser } from "@clerk/nextjs"
 import { ThemeSwitcher } from "@/components/theme-switcher"
+import { usePathname } from "next/navigation"
 
 export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showAdminMessage, setShowAdminMessage] = useState(false)
   const [userRole, setUserRole] = useState<string>('user')
   const { isSignedIn, user } = useUser()
+  const pathname = usePathname()
   const isAdmin = userRole === 'admin' || user?.primaryEmailAddress?.emailAddress === 'eltonramos417@gmail.com'
   const isSubscriber = userRole === 'subscriber'
   const canAccessSecurityCenter = isAdmin || isSubscriber
@@ -51,16 +53,36 @@ export function Navigation() {
 
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
+            <Link 
+              href="/" 
+              className={`text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] ${
+                pathname === '/' ? 'font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] scale-105' : ''
+              }`}
+            >
               Homepage
             </Link>
-            <Link href="/portfolio-security" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
+            <Link 
+              href="/portfolio-security" 
+              className={`text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] ${
+                pathname === '/portfolio-security' ? 'font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] scale-105' : ''
+              }`}
+            >
               Security Portfolio
             </Link>
-            <Link href="/mcp-integration" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
+            <Link 
+              href="/mcp-integration" 
+              className={`text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] ${
+                pathname === '/mcp-integration' ? 'font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] scale-105' : ''
+              }`}
+            >
               MCP Demo
             </Link>
-            <Link href="/security-plan" className="text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">
+            <Link 
+              href="/security-plan" 
+              className={`text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:scale-110 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] ${
+                pathname === '/security-plan' ? 'font-bold text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] scale-105' : ''
+              }`}
+            >
               Security Plan
             </Link>
             {!isAdmin && (
@@ -130,28 +152,36 @@ export function Navigation() {
           <div className="md:hidden py-4 space-y-4 border-t border-border">
             <Link
               href="/"
-              className="block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2"
+              className={`block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2 ${
+                pathname === '/' ? 'font-bold text-cyan-400 translate-x-2' : ''
+              }`}
               onClick={() => setMobileMenuOpen(false)}
             >
               Homepage
             </Link>
             <Link
               href="/portfolio-security"
-              className="block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2"
+              className={`block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2 ${
+                pathname === '/portfolio-security' ? 'font-bold text-cyan-400 translate-x-2' : ''
+              }`}
               onClick={() => setMobileMenuOpen(false)}
             >
               Security Portfolio
             </Link>
             <Link
               href="/mcp-integration"
-              className="block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2"
+              className={`block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2 ${
+                pathname === '/mcp-integration' ? 'font-bold text-cyan-400 translate-x-2' : ''
+              }`}
               onClick={() => setMobileMenuOpen(false)}
             >
               MCP Demo
             </Link>
             <Link
               href="/security-plan"
-              className="block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2"
+              className={`block text-sm font-medium hover:text-cyan-400 transition-all duration-300 hover:translate-x-2 ${
+                pathname === '/security-plan' ? 'font-bold text-cyan-400 translate-x-2' : ''
+              }`}
               onClick={() => setMobileMenuOpen(false)}
             >
               Security Plan

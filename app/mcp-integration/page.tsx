@@ -189,11 +189,11 @@ export default function McpIntegrationPage() {
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Rolls:</span>
-                          <span className="font-mono">[{diceResult.result?.rolls?.join(', ')}]</span>
+                          <span className="font-mono">[{diceResult.rolls?.join(', ')}]</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Total:</span>
-                          <span className="font-bold text-2xl text-cyan-400">{diceResult.result?.total}</span>
+                          <span className="font-bold text-2xl text-cyan-400">{diceResult.total}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Timestamp:</span>
@@ -236,8 +236,8 @@ export default function McpIntegrationPage() {
                           </div>
                           <div className="space-y-1 font-mono text-xs">
                             <div>User: {log.user}</div>
-                            <div>Rolls: [{log.details.result?.rolls?.join(', ')}]</div>
-                            <div>Total: {log.details.result?.total}</div>
+                            <div>Rolls: [{log.details.rolls?.join(', ')}]</div>
+                            <div>Total: {log.details.total}</div>
                           </div>
                         </div>
                       ))}
@@ -503,7 +503,7 @@ curl -X POST https://v0-portfolio-app-prototype-weeklate.vercel.app/api/mcp/roll
                   </Link>
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href="https://github.com/yourusername/v0-portfolio-app-prototype" target="_blank">
+                  <Link href="/mcp-integration/source">
                     <Code className="w-4 h-4 mr-2" />
                     View Source Code
                   </Link>

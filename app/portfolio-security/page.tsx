@@ -26,8 +26,57 @@ import {
   ArrowLeft
 } from "lucide-react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import { 
+  downloadExecutiveBriefing, 
+  downloadSecurityMetrics,
+  downloadPenetrationTestingReport,
+  downloadComplianceReport
+} from "@/lib/pdf-generator"
+
+interface SecurityMetrics {
+  waf: {
+    requestsBlocked: number
+    botAttempts: number
+    rateLimitHits: number
+    successRate: string
+  }
+  auth: {
+    activeUsers: number
+    totalUsers: number
+    oauthSessions: number
+    failedAttempts: number
+    authSuccessRate: string
+  }
+  mcp: {
+    toolExecutions: number
+    auditLogs: number
+    avgLatency: string
+    uptime: string
+  }
+}
 
 export default function PortfolioSecurityPage() {
+  const [metrics, setMetrics] = useState<SecurityMetrics | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchMetrics() {
+      try {
+        const response = await fetch('/api/security/metrics')
+        if (response.ok) {
+          const data = await response.json()
+          setMetrics(data)
+        }
+      } catch (error) {
+        console.error('Error fetching metrics:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchMetrics()
+  }, [])
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -471,24 +520,28 @@ export default function PortfolioSecurityPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Requests Blocked</span>
-                    <span className="font-semibold">847</span>
+                {loading ? (
+                  <div className="text-center text-muted-foreground">Loading...</div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Requests Blocked</span>
+                      <span className="font-semibold">{metrics?.waf.requestsBlocked || 0}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Bot Attempts</span>
+                      <span className="font-semibold">{metrics?.waf.botAttempts || 0}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Rate Limit Hits</span>
+                      <span className="font-semibold">{metrics?.waf.rateLimitHits || 0}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Success Rate</span>
+                      <span className="font-semibold text-green-400">{metrics?.waf.successRate || '0%'}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Bot Attempts</span>
-                    <span className="font-semibold">234</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Rate Limit Hits</span>
-                    <span className="font-semibold">123</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Success Rate</span>
-                    <span className="font-semibold text-green-400">99.8%</span>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
@@ -500,24 +553,28 @@ export default function PortfolioSecurityPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Active Users</span>
-                    <span className="font-semibold">156</span>
+                {loading ? (
+                  <div className="text-center text-muted-foreground">Loading...</div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Active Users</span>
+                      <span className="font-semibold">{metrics?.auth.activeUsers || 0}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">OAuth Sessions</span>
+                      <span className="font-semibold">{metrics?.auth.oauthSessions || 0}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Failed Attempts</span>
+                      <span className="font-semibold">{metrics?.auth.failedAttempts || 0}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Auth Success</span>
+                      <span className="font-semibold text-green-400">{metrics?.auth.authSuccessRate || '0%'}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">OAuth Sessions</span>
-                    <span className="font-semibold">203</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Failed Attempts</span>
-                    <span className="font-semibold">12</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Auth Success</span>
-                    <span className="font-semibold text-green-400">98.2%</span>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
@@ -529,24 +586,28 @@ export default function PortfolioSecurityPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tool Executions</span>
-                    <span className="font-semibold">1,234</span>
+                {loading ? (
+                  <div className="text-center text-muted-foreground">Loading...</div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Tool Executions</span>
+                      <span className="font-semibold">{metrics?.mcp.toolExecutions || 0}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Avg Latency</span>
+                      <span className="font-semibold">{metrics?.mcp.avgLatency || '0ms'}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Audit Logs</span>
+                      <span className="font-semibold">{metrics?.mcp.auditLogs || 0}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Uptime</span>
+                      <span className="font-semibold text-green-400">{metrics?.mcp.uptime || '0%'}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Avg Latency</span>
-                    <span className="font-semibold">42ms</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Audit Logs</span>
-                    <span className="font-semibold">1,234</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Uptime</span>
-                    <span className="font-semibold text-green-400">99.9%</span>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -555,41 +616,43 @@ export default function PortfolioSecurityPage() {
           <Card className="border-cyan-400/20">
             <CardHeader>
               <CardTitle>Downloadable Reports</CardTitle>
-              <CardDescription>Executive summary reports for stakeholder presentations</CardDescription>
+              <CardDescription>Professional PDF reports for stakeholder presentations</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-4">
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => window.open('/api/reports/security-metrics', '_blank')}
+                  onClick={downloadSecurityMetrics}
+                  disabled={loading}
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Security Metrics Report (TXT)
+                  Security Metrics Report (PDF)
                 </Button>
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => window.open('/api/reports/pentesting', '_blank')}
+                  onClick={downloadExecutiveBriefing}
+                  disabled={loading}
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Penetration Testing Summary (TXT)
+                  Executive Briefing (PDF)
                 </Button>
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => window.open('/api/reports/compliance', '_blank')}
+                  onClick={downloadPenetrationTestingReport}
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Compliance Status Report (TXT)
+                  Penetration Testing Summary (PDF)
                 </Button>
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => window.open('/api/reports/executive-briefing', '_blank')}
+                  onClick={downloadComplianceReport}
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Executive Briefing (TXT)
+                  Compliance Status Report (PDF)
                 </Button>
               </div>
             </CardContent>

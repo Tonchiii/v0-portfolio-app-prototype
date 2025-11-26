@@ -286,7 +286,7 @@ export default function OAuthMcpCaseStudyPage() {
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="https://github.com/yourusername/v0-portfolio-app-prototype" target="_blank">
+              <Link href="/mcp-integration/source">
                 <ExternalLink className="w-4 h-4 mr-2" />
                 View Source Code
               </Link>
