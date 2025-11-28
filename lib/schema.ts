@@ -99,3 +99,14 @@ export const blocked_users = pgTable("blocked_users", {
   reason: text("reason"),
   created_at: timestamp("created_at").defaultNow(),
 });
+
+// ACCOUNT LOCKOUTS TABLE (for brute force protection)
+export const account_lockouts = pgTable("account_lockouts", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  failed_attempts: serial("failed_attempts").notNull().default(0),
+  locked_until: timestamp("locked_until"),
+  last_attempt: timestamp("last_attempt").defaultNow(),
+  created_at: timestamp("created_at").defaultNow(),
+  updated_at: timestamp("updated_at").defaultNow(),
+});

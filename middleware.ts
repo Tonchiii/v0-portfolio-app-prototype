@@ -3,6 +3,35 @@ import { NextResponse, type NextRequest } from "next/server"
 import { db } from "@/lib/db"
 import { blocked_users } from "@/lib/schema"
 import { eq } from "drizzle-orm"
+import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next"
+
+// Arcjet protection with bot detection, rate limiting, and attack shield
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  characteristics: ["ip.src"],
+  rules: [
+    // ML-powered bot detection
+    detectBot({
+      mode: "LIVE",
+      allow: [
+        "CATEGORY:SEARCH_ENGINE", // Google, Bing, DuckDuckGo
+        "CATEGORY:PREVIEW", // Social media preview bots
+        "CATEGORY:MONITOR", // Uptime monitors
+      ],
+    }),
+    // Shield against common attacks (SQL injection, XSS, etc.)
+    shield({
+      mode: "LIVE",
+    }),
+    // Token bucket rate limiting (more sophisticated than simple counter)
+    tokenBucket({
+      mode: "LIVE",
+      refillRate: 100, // 100 tokens per interval
+      interval: 60, // 60 seconds
+      capacity: 100, // Max 100 tokens in bucket
+    }),
+  ],
+})
 
 // Public routes matcher - These routes are accessible without authentication
 const isPublicRoute = createRouteMatcher([
@@ -15,8 +44,18 @@ const isPublicRoute = createRouteMatcher([
 // Simple in-memory rate limiter (per-process). Good for dev / lightweight edge
 // For production use a distributed store like Redis or Upstash.
 const RATE_LIMIT_WINDOW_MS = 60_000 // 1 minute
-const RATE_LIMIT_MAX = process.env.NODE_ENV === "development" ? 1000 : 100 // Higher limit for dev
+const RATE_LIMIT_MAX = process.env.NODE_ENV === "development" ? 100 : 100 // 100 requests per minute
 const rateLimitStore = new Map<string, { count: number; reset: number }>()
+
+// Cleanup old entries every 5 minutes to prevent memory leak
+setInterval(() => {
+  const now = Date.now()
+  for (const [key, value] of rateLimitStore.entries()) {
+    if (value.reset < now) {
+      rateLimitStore.delete(key)
+    }
+  }
+}, 5 * 60 * 1000)
 
 function getIP(req: NextRequest) {
   // Try common headers first (behind proxies/load balancers), fall back to request ip
@@ -29,26 +68,75 @@ function getIP(req: NextRequest) {
 }
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
-  // Basic rate limiting
+  // Arcjet protection (bot detection, rate limiting, attack shield)
+  const decision = await aj.protect(req)
+  
+  // Handle denied requests
+  if (decision.isDenied()) {
+    const ip = getIP(req)
+    
+    if (decision.reason.isBot()) {
+      console.warn(`[ARCJET] Bot detected and blocked from ${ip}`)
+      return new NextResponse("Forbidden - Bot Detected", { 
+        status: 403,
+        headers: {
+          "X-Arcjet-Decision": "DENY",
+          "X-Arcjet-Reason": "BOT_DETECTED",
+        }
+      })
+    }
+    
+    if (decision.reason.isRateLimit()) {
+      console.warn(`[ARCJET] Rate limit exceeded from ${ip}`)
+      return new NextResponse("Too Many Requests", { 
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((decision.reason.resetTime - Date.now()) / 1000)),
+          "X-RateLimit-Limit": String(decision.reason.max),
+          "X-RateLimit-Remaining": String(decision.reason.remaining),
+          "X-RateLimit-Reset": new Date(decision.reason.resetTime).toISOString(),
+        }
+      })
+    }
+    
+    if (decision.reason.isShield()) {
+      console.warn(`[ARCJET] Attack detected and blocked from ${ip}`)
+      return new NextResponse("Forbidden - Suspicious Activity", { 
+        status: 403,
+        headers: {
+          "X-Arcjet-Decision": "DENY",
+          "X-Arcjet-Reason": "ATTACK_DETECTED",
+        }
+      })
+    }
+  }
+  
+  // Fallback: Basic rate limiting (in case Arcjet fails)
   try {
     const ip = getIP(req)
     const now = Date.now()
     const entry = rateLimitStore.get(ip)
+    
     if (!entry || entry.reset < now) {
       rateLimitStore.set(ip, { count: 1, reset: now + RATE_LIMIT_WINDOW_MS })
     } else {
       entry.count += 1
+      
       if (entry.count > RATE_LIMIT_MAX) {
         const retryAfter = Math.ceil((entry.reset - now) / 1000)
+        console.warn(`[FALLBACK] Rate limit exceeded: ${ip}`)
+        
         const tooMany = new NextResponse("Too Many Requests", { status: 429 })
         tooMany.headers.set("Retry-After", String(retryAfter))
+        tooMany.headers.set("X-RateLimit-Limit", String(RATE_LIMIT_MAX))
+        tooMany.headers.set("X-RateLimit-Remaining", "0")
         return tooMany
       }
+      
       rateLimitStore.set(ip, entry)
     }
   } catch (err) {
-    // If rate limiter has an error, continue — don't block requests unnecessarily
-    // but log in a real app.
+    console.error("Rate limiting error:", err)
   }
 
   // Protect ALL routes except public routes (sign-in, sign-up)
