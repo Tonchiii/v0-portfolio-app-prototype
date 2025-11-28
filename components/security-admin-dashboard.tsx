@@ -177,10 +177,8 @@ export function SecurityAdminDashboard({ userRole = 'user' }: SecurityAdminDashb
             }
           })
           
-          // Filter out users that were deleted (exist in Clerk but not in db and db has data)
-          const finalUsers = dbUsers.length > 0 
-            ? processedUsers.filter(pu => dbUsers.some(du => du.email === pu.email))
-            : processedUsers
+          // Show all users from Clerk (don't filter out new users)
+          const finalUsers = processedUsers
           
           // Add current user if not in list
           if (clerkUser && !finalUsers.find(u => u.email === clerkUser.primaryEmailAddress?.emailAddress)) {
