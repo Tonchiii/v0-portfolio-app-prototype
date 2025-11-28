@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { currentUser } from '@clerk/nextjs/server'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 interface AuditLogEntry {
   id: string
   action: string

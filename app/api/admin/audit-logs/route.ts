@@ -3,6 +3,9 @@ import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 import { audit_logs } from "@/lib/schema"
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 // GET all audit logs
 export async function GET() {
   try {

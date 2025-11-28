@@ -3,6 +3,9 @@ import { auth } from "@clerk/nextjs/server"
 import Groq from "groq-sdk"
 import { buildPortfolioPrompt } from "@/lib/portfolio-context"
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 type Message = {
   role: "user" | "assistant" | "system"
   content: string

@@ -4,6 +4,9 @@ import { db } from "@/lib/db"
 import { vulnerabilities } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 // GET all vulnerabilities
 export async function GET() {
   try {

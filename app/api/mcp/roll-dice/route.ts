@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { currentUser } from '@clerk/nextjs/server'
 import arcjet, { tokenBucket, detectBot } from '@arcjet/next'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 // Arcjet protection for MCP endpoints
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,

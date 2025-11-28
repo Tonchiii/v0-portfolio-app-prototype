@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server"
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 // In-memory presence store for prototype only
 // Maps clientId -> lastSeen timestamp (ms)
 const presence = new Map<string, number>()

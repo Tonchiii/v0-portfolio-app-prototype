@@ -4,6 +4,9 @@ import { db } from "@/lib/db"
 import { blocked_users } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 // POST - Block a user
 export async function POST(request: Request) {
   try {

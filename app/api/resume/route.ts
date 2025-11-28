@@ -2,6 +2,9 @@ import { NextResponse } from "next/server"
 import { readFile } from "fs/promises"
 import { join } from "path"
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 export async function GET() {
   try {
     // Try to find the resume image (check multiple locations and formats)

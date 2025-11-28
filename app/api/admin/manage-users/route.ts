@@ -4,6 +4,9 @@ import { db } from "@/lib/db"
 import { admin_users } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 // GET all admin users
 export async function GET() {
   try {
