@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
-import { db } from "@/lib/db"
+import { db, isDatabaseAvailable } from "@/lib/db"
 import { audit_logs } from "@/lib/schema"
 
 export const dynamic = 'force-dynamic'
@@ -12,6 +12,10 @@ export async function GET() {
     const { userId } = await auth()
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    if (!isDatabaseAvailable()) {
+      return NextResponse.json([])
     }
 
     const logs = await db.select().from(audit_logs)

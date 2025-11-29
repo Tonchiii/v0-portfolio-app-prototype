@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
-import { db } from "@/lib/db"
+import { db, isDatabaseAvailable } from "@/lib/db"
 import { admin_users } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 
@@ -13,6 +13,10 @@ export async function GET() {
     const { userId } = await auth()
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    if (!isDatabaseAvailable()) {
+      return NextResponse.json([]) // Return empty array if DB not available
     }
 
     const users = await db.select().from(admin_users)
@@ -29,6 +33,10 @@ export async function POST(request: Request) {
     const { userId } = await auth()
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    if (!isDatabaseAvailable()) {
+      return NextResponse.json({ error: "Database not available" }, { status: 503 })
     }
 
     const data = await request.json()
